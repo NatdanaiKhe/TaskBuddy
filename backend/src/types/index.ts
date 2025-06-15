@@ -34,11 +34,10 @@ export interface CreateUserDto {
 }
 
 export interface UpdateUserDto {
-  email?: string;
   firstName?: string;
   lastName?: string;
-  role?: UserRole;
   isActive?: boolean;
+  updatedAt: Date;
 }
 
 export interface UserResponse {
@@ -52,7 +51,7 @@ export interface UserResponse {
   updatedAt: Date;
 }
 
-export interface Service {
+export interface Task {
   id: string;
   providerId: string;
   title: string;
@@ -65,7 +64,8 @@ export interface Service {
   updatedAt: Date;
 }
 
-export interface CreateServiceDto {
+export interface CreateTaskDto {
+  id: string;
   providerId: string;
   title: string;
   description: string;
@@ -75,7 +75,7 @@ export interface CreateServiceDto {
   imageUrls?: string[];
 }
 
-export interface UpdateServiceDto {
+export interface UpdateTaskDto {
   title?: string;
   description?: string;
   category?: string;

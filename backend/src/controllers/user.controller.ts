@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { v4 as uuidv4 } from "uuid";
 import bcryptjs from "bcryptjs";
 import { UserModel } from "../models/user.model";
+import logger from "../utils/logger";
 export class UserController {
   createUser = async (
     req: Request,
@@ -16,18 +17,18 @@ export class UserController {
       }
 
       // hash and add uuid
-      const hashedPassword = await bcryptjs.hash(userData.password, 10);
       const userId = uuidv4();
+      const hashedPassword = await bcryptjs.hash(userData.password, 10);
+
       userData.id = userId;
       userData.password = hashedPassword;
       userData.role = userData.role || "customer";
 
       const newUser = await UserModel.createUser(userData);
-      console.log("New User Created:", newUser);
 
       if (!newUser) {
         res
-          .status(500)
+          .status(200)
           .json({ success: false, message: "Email already exist" });
         return;
       } else {
@@ -49,16 +50,41 @@ export class UserController {
   ): Promise<void> => {
     try {
       const { id } = req.params;
-      if (!id) {
-        res.status(400).json({ success: false, message: "ID is required" });
-      }
-      const user = await UserModel.getUserById(id);
+      const userId = req.user?.id;
+      const userRole = req.user?.role;
 
-      res.status(200).json({
-        success: true,
-        data: user || null,
-        message: user ? "User found" : "User not found",
-      });
+      // if not admin, use userId from request to get user
+      if (userRole !== "admin" && !id) {
+        if (!userId) {
+          res.status(400).json({ success: false, message: "ID is required" });
+          return;
+        }
+        const user = await UserModel.getUserById(userId);
+        res.status(200).json({
+          success: true,
+          data: user || null,
+          message: user ? "User found" : "User not found",
+        });
+        return;
+      }
+      // if admin, get user by id
+      if (userRole === "admin") {
+        if (!id) {
+          res.status(400).json({ success: false, message: "ID is required" });
+          return;
+        }
+        const user = await UserModel.getUserById(id);
+        res.status(200).json({
+          success: true,
+          data: user || null,
+          message: user ? "User found" : "User not found",
+        });
+      }
+
+      if (!id && userRole !== "admin") {
+        res.status(400).json({ success: false, message: "ID is required" });
+        return;
+      }
     } catch (error) {
       next(error);
     }
@@ -157,7 +183,44 @@ export class UserController {
     }
   };
 
-  deleteUser = async (req:Request,res:Response,next:NextFunction): Promise<void> => {
+  deActivateUser = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        res.status(400).json({ success: false, message: "ID is required" });
+        return;
+      }
+      const deactivatedUser = await UserModel.updateUser(userId, {
+        isActive: false,
+      });
+      if (deactivatedUser) {
+        res.status(200).json({
+          success: true,
+          message: "User deactivated successfully",
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+
+        return;
+      }
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  deleteUser = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
       const { id } = req.params;
       const userId = req.user?.id;
@@ -203,9 +266,8 @@ export class UserController {
           });
         }
       }
-      
     } catch (error) {
       next(error);
     }
-  }
+  };
 }

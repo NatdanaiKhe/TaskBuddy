@@ -1,5 +1,5 @@
 import { Database } from "../config/db";
-import { CreateUserDto, UserResponse, User } from "../types";
+import { CreateUserDto, UserResponse, User, UpdateUserDto } from "../types";
 import logger from "../utils/logger";
 
 export class UserModel {
@@ -36,7 +36,6 @@ export class UserModel {
 
     const result = await Database.query(query, values);
 
-
     if (result.affectedRows === 0) {
       logger.error("Failed to create user", { email });
       return null;
@@ -67,7 +66,7 @@ export class UserModel {
   }
 
   static async getUserByEmail(email: string): Promise<User | null> {
-    const query = "SELECT * FROM users WHERE email = ?";
+    const query = "SELECT * FROM users WHERE email = ? AND isActive = 1";
     const result = await Database.query(query, [email]);
     if (result.length === 0) {
       return null;
@@ -102,23 +101,35 @@ export class UserModel {
 
   static async updateUser(
     userId: string,
-    userData: Partial<CreateUserDto>
-  ): Promise<UserResponse | null> {
-    const { email, firstName, lastName, role, isActive } = userData;
+    userData: Partial<UpdateUserDto>
+  ): Promise<UpdateUserDto | null> {
+    const fields: string[] = [];
+    const values: any[] = [];
+
+    if (userData.firstName !== undefined) {
+      fields.push("firstName = ?");
+      values.push(userData.firstName);
+    }
+
+    if (userData.lastName !== undefined) {
+      fields.push("lastName = ?");
+      values.push(userData.lastName);
+    }
+
+    if (userData.isActive !== undefined) {
+      fields.push("isActive = ?");
+      values.push(userData.isActive ? 1 : 0);
+    }
+    if (fields.length === 0) {
+      return null;
+    }
 
     const query = `
-      UPDATE users
-      SET email = ?, firstName = ?, lastName = ?, role = ?, isActive = ?
-      WHERE id = ?
-    `;
-    const values = [
-      email,
-      firstName,
-      lastName,
-      role || "customer",
-      isActive ? 1 : 0,
-      userId,
-    ];
+    UPDATE users
+    SET ${fields.join(", ")}
+    WHERE id = ?
+  `;
+    values.push(userId);
 
     const result = await Database.query(query, values);
 
@@ -127,13 +138,7 @@ export class UserModel {
     }
 
     return {
-      id: userId,
-      email: email || "",
-      firstName: firstName || "",
-      lastName: lastName || "",
-      role: role || "customer",
-      isActive: isActive ? true : false,
-      createdAt: new Date(),
+      ...userData,
       updatedAt: new Date(),
     };
   }
