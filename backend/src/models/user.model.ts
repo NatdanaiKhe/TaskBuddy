@@ -17,8 +17,7 @@ export class UserModel {
     // Check if user already exists
     const existingUser = await this.getUserByEmail(email);
     if (existingUser) {
-      logger.error(`User with email ${email} already exists.`);
-      throw new Error("User already exists");
+      return null;
     }
 
     const query = `
@@ -32,13 +31,15 @@ export class UserModel {
       lastName,
       role || "customer",
       isActive ? 1 : 0,
+      password,
     ];
 
     const result = await Database.query(query, values);
 
+
     if (result.affectedRows === 0) {
-      logger.error("Failed to create user.");
-      throw new Error("Failed to create user");
+      logger.error("Failed to create user", { email });
+      return null;
     }
 
     return {
@@ -48,7 +49,7 @@ export class UserModel {
       lastName,
       role: role || "customer",
       isActive: isActive ? 1 : 0,
-      password, 
+      password,
       message: "User created successfully",
       success: true,
     };
@@ -74,8 +75,12 @@ export class UserModel {
     return result[0];
   }
 
-  static async getAllUsers(limit:number=10,page:number=1): Promise<UserResponse[]> {
-    const query = "SELECT * FROM users  ORDER BY createdAt DESC LIMIT ? OFFSET ?";
+  static async getAllUsers(
+    limit: number = 10,
+    page: number = 1
+  ): Promise<UserResponse[]> {
+    const query =
+      "SELECT * FROM users  ORDER BY createdAt DESC LIMIT ? OFFSET ?";
     const offset = (page - 1) * limit;
     const values = [limit, offset];
     const result = await Database.query(query, values);
@@ -127,7 +132,7 @@ export class UserModel {
       firstName: firstName || "",
       lastName: lastName || "",
       role: role || "customer",
-      isActive: isActive  ? true : false,
+      isActive: isActive ? true : false,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -139,5 +144,4 @@ export class UserModel {
 
     return result.affectedRows > 0;
   }
-  
 }

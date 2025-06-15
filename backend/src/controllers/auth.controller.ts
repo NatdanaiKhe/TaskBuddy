@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import bcryptjs from "bcryptjs";
+import {v4 as uuidv4 } from "uuid";
 import { generateToken } from "../services/auth.service";
 import { UserModel } from "../models/user.model";
+import logger from "../utils/logger";
 
 export class AuthController {
   register = async (
@@ -9,25 +11,30 @@ export class AuthController {
     res: Response,
     next: NextFunction
   ): Promise<void> => {
-    const userData = req.body;
+    
     try {
-
+      const userData = req.body;
       if (!userData || !userData.email || !userData.password) {
         res.status(400).json({ success: false, message: "Invalid user data" });
         return;
       }
 
+
       // hash and add uuid
+      const userId =  uuidv4();
       const hashedPassword = await bcryptjs.hash(userData.password, 10);
+
+      userData.id = userId;
       userData.password = hashedPassword;
       userData.role = userData.role || "customer";
 
+      logger.info("User Data:", userData);
       const newUser = await UserModel.createUser(userData);
      
 
       if (!newUser) {
         res
-          .status(500)
+          .status(200)
           .json({ success: false, message: "Email already exists" });
         return;
       } else {
