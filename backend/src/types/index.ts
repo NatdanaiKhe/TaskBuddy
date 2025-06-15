@@ -1,6 +1,13 @@
-
 // types.ts
-export type UserRole = "customer" | "provider";
+declare global {
+  namespace Express {
+    interface Request {
+      user?: UserResponse;
+    }
+  }
+}
+
+export type UserRole = "customer" | "provider" | "admin";
 export type BookingStatus = "pending" | "accepted" | "declined";
 
 export interface User {
@@ -46,8 +53,8 @@ export interface UserResponse {
 }
 
 export interface Service {
-  id: string; 
-  providerId: string; 
+  id: string;
+  providerId: string;
   title: string;
   description: string;
   category: string;
@@ -58,10 +65,29 @@ export interface Service {
   updatedAt: Date;
 }
 
+export interface CreateServiceDto {
+  providerId: string;
+  title: string;
+  description: string;
+  category: string;
+  price: number;
+  location: string;
+  imageUrls?: string[];
+}
+
+export interface UpdateServiceDto {
+  title?: string;
+  description?: string;
+  category?: string;
+  price?: number;
+  location?: string;
+  imageUrls?: string[];
+}
+
 export interface Booking {
-  id: string; 
-  customerId: string; 
-  serviceId: string; 
+  id: string;
+  customerId: string;
+  serviceId: string;
   status: BookingStatus;
   date: Date;
   message?: string;
@@ -70,9 +96,17 @@ export interface Booking {
 }
 
 export interface Review {
-  id: string; 
+  id: string;
   bookingId: string;
   rating: number;
   comment: string;
   createdAt: Date;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

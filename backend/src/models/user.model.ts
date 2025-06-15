@@ -73,4 +73,71 @@ export class UserModel {
     }
     return result[0];
   }
+
+  static async getAllUsers(limit:number=10,page:number=1): Promise<UserResponse[]> {
+    const query = "SELECT * FROM users  ORDER BY createdAt DESC LIMIT ? OFFSET ?";
+    const offset = (page - 1) * limit;
+    const values = [limit, offset];
+    const result = await Database.query(query, values);
+
+    if (result.length === 0) {
+      return [];
+    }
+
+    return result.map((user: User) => ({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    }));
+  }
+
+  static async updateUser(
+    userId: string,
+    userData: Partial<CreateUserDto>
+  ): Promise<UserResponse | null> {
+    const { email, firstName, lastName, role, isActive } = userData;
+
+    const query = `
+      UPDATE users
+      SET email = ?, firstName = ?, lastName = ?, role = ?, isActive = ?
+      WHERE id = ?
+    `;
+    const values = [
+      email,
+      firstName,
+      lastName,
+      role || "customer",
+      isActive ? 1 : 0,
+      userId,
+    ];
+
+    const result = await Database.query(query, values);
+
+    if (result.affectedRows === 0) {
+      return null;
+    }
+
+    return {
+      id: userId,
+      email: email || "",
+      firstName: firstName || "",
+      lastName: lastName || "",
+      role: role || "customer",
+      isActive: isActive  ? true : false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+  }
+
+  static async deleteUser(userId: string): Promise<boolean> {
+    const query = "DELETE FROM users WHERE id = ?";
+    const result = await Database.query(query, [userId]);
+
+    return result.affectedRows > 0;
+  }
+  
 }
