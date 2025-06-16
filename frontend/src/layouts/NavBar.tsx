@@ -1,18 +1,20 @@
 import { useState } from "react";
 import { SearchIcon, MenuIcon, UserIcon, XIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 function NavBar() {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const MenuList = (
     <>
-      <a href="#" className="text-gray-600 hover:text-blue-600 text-center">
+      <a href="/tasks" className="text-gray-600 hover:text-blue-600 text-center">
         Browse Tasks
       </a>
-      <a href="#" className="text-gray-600 hover:text-blue-600 text-center">
+      <a href="/register" className="text-gray-600 hover:text-blue-600 text-center">
         Become a Tasker
       </a>
     </>
-  )
+  );
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
@@ -28,7 +30,6 @@ function NavBar() {
             <nav className="hidden md:flex items-center space-x-8">
               {MenuList}
             </nav>
-          
           </div>
 
           {/* Search and User */}
@@ -41,10 +42,20 @@ function NavBar() {
               />
               <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             </div>
-            <button className="p-2 rounded-full hover:bg-gray-100">
+            <button
+              onClick={() => {
+                navigate("/login");
+              }}
+              className="p-2 rounded-full hover:bg-gray-100"
+            >
               <UserIcon className="w-6 h-6 text-gray-600" />
             </button>
-            <button className="bg-blue-600 text-white px-5 py-2 rounded-full hover:bg-blue-700 transition">
+            <button
+              onClick={() => {
+                navigate("/register");
+              }}
+              className="bg-blue-600 text-white px-5 py-2 rounded-full hover:bg-blue-700 transition"
+            >
               Sign Up
             </button>
           </div>
@@ -75,7 +86,12 @@ function NavBar() {
                 />
                 <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               </div>
-              <button className="bg-blue-600 text-white py-2 rounded-full hover:bg-blue-700 transition">
+              <button
+                onClick={() => {
+                  navigate("/login");
+                }}
+                className="bg-blue-600 text-white py-2 rounded-full hover:bg-blue-700 transition"
+              >
                 Sign Up
               </button>
             </div>
@@ -84,6 +100,6 @@ function NavBar() {
       </div>
     </header>
   );
-};
+}
 
 export default NavBar;
