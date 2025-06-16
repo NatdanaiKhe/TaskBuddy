@@ -1,5 +1,5 @@
 import { Database } from "../config/db";
-import { CreateUserDto, UserResponse, User, UpdateUserDto } from "../types";
+import { CreateUserDto, UserResponse, User, UpdateUserDto } from "../types/userType";
 import logger from "../utils/logger";
 
 export class UserModel {
