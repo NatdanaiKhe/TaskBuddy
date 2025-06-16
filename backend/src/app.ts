@@ -7,6 +7,7 @@ dotenv.config();
 const app: Application = express();
 import userRoutes from "./routes/user.routes";
 import authRoutes from "./routes/auth.routes";
+import taskRoutes from "./routes/task.routes";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -29,6 +30,7 @@ app.use(limiter);
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes); 
+app.use('/api/tasks', taskRoutes);
 
 // Health check
 app.get("/health", (req:Request, res:Response) => {
