@@ -1,6 +1,5 @@
 export type UserRole = "customer" | "provider" | "admin";
 
-
 export interface User {
   id: string;
   email: string;
@@ -9,6 +8,7 @@ export interface User {
   password: string;
   role: UserRole;
   isActive: boolean;
+  isVerify: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,7 +21,9 @@ export interface CreateUserDto {
   password: string;
   role?: UserRole;
   isActive?: boolean;
-  confirmPassword?: string;
+  refreshToken?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface UpdateUserDto {

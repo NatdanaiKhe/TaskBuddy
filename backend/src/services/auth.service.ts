@@ -1,32 +1,56 @@
 import jwt from "jsonwebtoken";
 
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET!;
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET!;
+const JWT_EXPIRATION = process.env.ACCESS_TOKEN_SECRET || "30d";
+
+interface TokenPayload extends jwt.JwtPayload {
+  id: string;
+  role: string;
+}
+
 const generateAccessToken = (userId: string, userRole: string): string => {
-  const token = jwt.sign(
-    { id: userId, role: userRole },
-    process.env.JWT_SECRET!,
-    {
-      expiresIn: "1d",
-    }
-  );
+  const token = jwt.sign({ id: userId, role: userRole }, ACCESS_TOKEN_SECRET, {
+    expiresIn: "1h",
+  });
   return token;
 };
 
 const generateRefreshToken = (userId: string, userRole: string): string => {
-  const token = jwt.sign(
-    { id: userId, role: userRole },
-    process.env.JWT_SECRET!,
-    { expiresIn: "7d" }
-  );
+  const token = jwt.sign({ id: userId, role: userRole }, REFRESH_TOKEN_SECRET, {
+    expiresIn: "7d",
+  });
   return token;
 };
 
-const verifyToken = (token: string): any => {
+const verifyAccessToken = (token: string): { id: string; role: string } => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-    return decoded;
+    const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET);
+    if (typeof decoded === "object" && "id" in decoded && "role" in decoded) {
+      return decoded as TokenPayload;
+    }
+    throw new Error("Invalid token");
   } catch (error) {
     throw new Error("Invalid token");
   }
 };
 
-export { generateAccessToken, generateRefreshToken, verifyToken };
+const verifyRefreshToken = (token: string): { id: string; role: string } => {
+  try {
+    const decoded = jwt.verify(token, REFRESH_TOKEN_SECRET);
+    if (typeof decoded === "object" && "id" in decoded && "role" in decoded) {
+      return decoded as TokenPayload;
+    }
+
+    throw new Error("Invalid token");
+  } catch (error) {
+    throw new Error("Invalid token");
+  }
+};
+
+export {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyAccessToken,
+  verifyRefreshToken,
+};

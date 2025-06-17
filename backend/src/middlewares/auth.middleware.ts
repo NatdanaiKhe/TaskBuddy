@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { verifyToken } from "../services/auth.service";
+import { verifyAccessToken } from "../services/auth.service";
 
 interface AuthenticatedRequest extends Request {
   user?: any;
@@ -20,7 +20,7 @@ const authenticate = (
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = verifyToken(token);
+    const decoded = verifyAccessToken(token);
     req.user = decoded;
     next();
   } catch (err) {
