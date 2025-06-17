@@ -1,7 +1,7 @@
 
 import app from "./src/app";
 import config from "./src/config";
-import { Database } from "./src/config/db";
+import { checkTableExists, Database } from "./src/config/db";
 import logger from "./src/utils/logger";
 
 const PORT = config.PORT || 8000;
@@ -10,6 +10,7 @@ const PORT = config.PORT || 8000;
 Database.ping().then(res => {
   if (res.success) {
     logger.info("Database connected successfully at", res.timestamp);
+    checkTableExists();
   } else {
     logger.error("Database connection failed:", res.error);
     process.exit(1);
