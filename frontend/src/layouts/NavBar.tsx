@@ -1,16 +1,32 @@
 import { useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { SearchIcon, MenuIcon, UserIcon, XIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/useAuth";
 function NavBar() {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user } = useAuth();
 
   const MenuList = (
     <>
-      <a href="/tasks" className="text-gray-600 hover:text-blue-600 text-center">
+      <a
+        href="/tasks"
+        className="text-gray-600 hover:text-blue-600 text-center"
+      >
         Browse Tasks
       </a>
-      <a href="/register" className="text-gray-600 hover:text-blue-600 text-center">
+      <a
+        href="/register"
+        className="text-gray-600 hover:text-blue-600 text-center"
+      >
         Become a Tasker
       </a>
     </>
@@ -42,22 +58,40 @@ function NavBar() {
               />
               <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             </div>
-            <button
-              onClick={() => {
-                navigate("/login");
-              }}
-              className="p-2 rounded-full hover:bg-gray-100"
-            >
-              <UserIcon className="w-6 h-6 text-gray-600" />
-            </button>
-            <button
-              onClick={() => {
-                navigate("/register");
-              }}
-              className="bg-blue-600 text-white px-5 py-2 rounded-full hover:bg-blue-700 transition"
-            >
-              Sign Up
-            </button>
+            {!user && (
+              <div className="flex justify-between items-center gap-4">
+                <button
+                  onClick={() => {
+                    navigate("/login");
+                  }}
+                  className="p-2 rounded-full hover:bg-gray-100"
+                >
+                  <UserIcon className="w-6 h-6 text-gray-600" />
+                </button>
+                <button
+                  onClick={() => {
+                    navigate("/register");
+                  }}
+                  className="bg-blue-600 text-white px-5 py-2 rounded-full hover:bg-blue-700 transition"
+                >
+                  Sign Up
+                </button>
+              </div>
+            )}
+            {user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  {user.firstName + " " + user.lastName}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem>Profile</DropdownMenuItem>
+                  <DropdownMenuItem>My Task</DropdownMenuItem>
+                  <DropdownMenuItem className="text-red-500">
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -86,14 +120,32 @@ function NavBar() {
                 />
                 <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               </div>
-              <button
-                onClick={() => {
-                  navigate("/login");
-                }}
-                className="bg-blue-600 text-white py-2 rounded-full hover:bg-blue-700 transition"
-              >
-                Sign Up
-              </button>
+              {!user && (
+                <button
+                  onClick={() => {
+                    navigate("/login");
+                  }}
+                  className="bg-blue-600 text-white py-2 rounded-full hover:bg-blue-700 transition"
+                >
+                  Sign Up
+                </button>
+              )}
+              {user && (
+                <div className="flex flex-col space-y-3">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      {user.firstName + " " + user.lastName}
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem>Profile</DropdownMenuItem>
+                      <DropdownMenuItem>My Task</DropdownMenuItem>
+                      <DropdownMenuItem className="text-red-500">
+                        Logout
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
             </div>
           </div>
         )}

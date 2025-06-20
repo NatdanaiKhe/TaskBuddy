@@ -1,23 +1,7 @@
-const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+// src/api/authService.ts
+import axios from "./axios"; // will set up interceptors in the next step
 
 const authService = {
-  login: async (email: string, password: string, remember: boolean) => {
-    const response = await fetch(`${baseUrl}/api/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password, remember }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Login failed");
-    }
-
-    const data = await response.json();
-    return data;
-  },
-
   register: async (
     firstName: string,
     lastName: string,
@@ -25,61 +9,41 @@ const authService = {
     role: string,
     password: string
   ) => {
-    const response = await fetch(`${baseUrl}/api/auth/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ firstName, lastName, email, role, password }),
+    const res = await axios.post("/auth/register", {
+      firstName,
+      lastName,
+      email,
+      role,
+      password,
     });
-    if (!response.ok) {
-      throw new Error("Registration failed");
-    }
+    return res.data.success;
   },
 
-  getMe: async (token: string) => {
-    const response = await fetch(`${baseUrl}/api/auth/me`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch user data");
-    }
-
-    const data = await response.json();
-    return data;
+  login: async (email: string, password: string, remember: boolean) => {
+    const res = await axios.post(
+      "/auth/login",
+      { email, password, remember },
+      { withCredentials: true }
+    );
+    return res.data;
   },
 
-  logout: async (token: string) => {
-    const response = await fetch(`${baseUrl}/api/auth/logout`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Logout failed");
-    }
+  getMe: async () => {
+    const res = await axios.get("/auth/me", { withCredentials: true });
+    return res.data.data;
   },
-  refreshToken: async (refreshToken: string) => {
-    const response = await fetch(`${baseUrl}/api/auth/refresh-token`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ refreshToken }),
-    });
 
-    if (!response.ok) {
-      throw new Error("Failed to refresh token");
-    }
+  refreshToken: async () => {
+    const res = await axios.post(
+      "/auth/refresh-token",
+      {},
+      { withCredentials: true }
+    );
+    return res.data;
+  },
 
-    const data = await response.json();
-    return data;
+  logout: async () => {
+    await axios.post("/auth/logout", {}, { withCredentials: true });
   },
 };
 

@@ -5,12 +5,13 @@ import Error from './components/Error';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ProtectedRoute from './context/ProtectedRoute';
+import { PublicRoute } from './context/PublicRoute';
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element:  <MainLayout/>,
-    errorElement: <Error/>,
+    element: <MainLayout />,
+    errorElement: <Error />,
     children: [
       {
         path: "",
@@ -18,16 +19,28 @@ const router = createBrowserRouter([
       },
       {
         path: "login",
-        element: <Login />, 
+        element: (
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        ),
       },
       {
         path: "register",
-        element: <Register />
+        element: (
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        ),
       },
       {
-        path: 'admin',
-        element:  <ProtectedRoute roles={['admin']}><div>admin</div></ProtectedRoute>
-      }
+        path: "admin",
+        element: (
+          <ProtectedRoute roles={["admin"]}>
+            <div>admin</div>
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 ]);
