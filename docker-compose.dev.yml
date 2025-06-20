@@ -10,6 +10,9 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
     depends_on:
       - backend
 
@@ -24,6 +27,7 @@ services:
       - /app/node_modules
     environment:
       - DATABASE_URL=postgres://postgres:password@db:5432/taskbuddy
+      - CHOKIDAR_USEPOLLING=true
     depends_on:
       - db
 
