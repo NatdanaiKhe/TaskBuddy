@@ -16,6 +16,12 @@ const authService = {
       role,
       password,
     });
+    return res.data;
+  },
+
+  verifyEmail: async (token: string) => {
+    const res = await axios.post("/auth/verify-email/" + token);
+
     return res.data.success;
   },
 
@@ -39,6 +45,14 @@ const authService = {
       {},
       { withCredentials: true }
     );
+    return res.data;
+  },
+  forgotPassword: async (email: string) => {
+    const res = await axios.post("/auth/forgot-password", { email });
+    return res.data;
+  },
+  resetPassword: async (token: string, password: string) => {
+    const res = await axios.post("/auth/reset-password", { token, password });
     return res.data;
   },
 
