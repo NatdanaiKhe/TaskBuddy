@@ -8,7 +8,13 @@ import {
 } from "../services/auth.service";
 import { UserModel } from "../models/user.model";
 import { TokenModel } from "../models/token.model";
+import { EmailVerifyModel } from "../models/email.model";
 import logger from "../utils/logger";
+import {
+  sendResetPasswordEmail,
+  sendVerificationEmail,
+} from "../services/email.service";
+import { PasswordResetModel } from "../models/password.model";
 
 export class AuthController {
   register = async (
@@ -25,6 +31,7 @@ export class AuthController {
 
       // hash and add uuid
       const userId = uuidv4();
+      const emailVerifyToken = uuidv4();
       const hashedPassword = await bcryptjs.hash(userData.password, 10);
 
       userData.id = userId;
@@ -41,6 +48,21 @@ export class AuthController {
       } else {
         // log user created
         logger.info("User Data:", userData);
+        // create email verify token
+        const createEmailToken = EmailVerifyModel.create(
+          userData.id,
+          emailVerifyToken
+        );
+
+        if (!createEmailToken) {
+          res
+            .status(400)
+            .json({ success: false, message: "Create User failed" });
+        }
+
+        // send email
+        await sendVerificationEmail(userData.email, emailVerifyToken);
+
         res.status(201).json({
           success: true,
           data: newUser,
@@ -55,51 +77,76 @@ export class AuthController {
     }
   };
 
+  verifyEmail = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const token = req?.params?.token;
+
+      const result = await EmailVerifyModel.update(token);
+      if (result) {
+        res
+          .status(200)
+          .json({ success: true, message: "Verify email success" });
+      } else {
+        res
+          .status(400)
+          .json({ success: false, message: "Verify email failed" });
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        logger.error("Verify email error : ", error.message);
+      }
+    }
+  };
+
   login = async (
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
     try {
-      
       const { email, password, remember = false } = req.body;
-      // validate request
+
       if (!email || !password) {
-        res
-          .status(400)
-          .json({ success: false, message: "Email and password are required" });
+        res.status(400).json({
+          success: false,
+          message: "Email and password are required",
+        });
         return;
       }
 
-      // check email and password
       const user = await UserModel.getUserByEmail(email);
-      logger.info("user:",user);
       if (!user) {
-        res
-          .status(401)
-          .json({ success: false, message: "Invalid credentials" });
+        res.status(401).json({
+          success: false,
+          message: "Invalid credentials",
+        });
         return;
       }
+
       const isMatch = await bcryptjs.compare(password, user.password);
       if (!isMatch) {
-        res
-          .status(401)
-          .json({ success: false, message: "Invalid credentials" });
+        res.status(401).json({
+          success: false,
+          message: "Invalid credentials",
+        });
         return;
       }
 
-      // generate token
       const accessToken = generateAccessToken(user.id, user.role);
       const refreshToken = generateRefreshToken(user.id, user.role);
-      // save refreshToken to database
+
       await TokenModel.saveRefreshToken(user.id, refreshToken);
 
-      // set cookie
+      // set refresh token in cookie for 7 days if remember, else session cookie
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: true,
         sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: remember ? 7 * 24 * 60 * 60 * 1000 : undefined,
       });
 
       res.status(200).json({
@@ -153,6 +200,88 @@ export class AuthController {
       if (err instanceof Error) {
         throw new Error(err.message);
       }
+    }
+  };
+
+  forgotPassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { email } = req?.body;
+      const user = await UserModel.getUserByEmail(email);
+      let token = "";
+
+      if (!user) {
+        res.status(400).json({ success: false, message: "User not found" });
+        return;
+      }
+
+      const checkToken = await PasswordResetModel.getByEmail(email);
+
+      if (!checkToken) {
+        token = uuidv4();
+        // expire in 1 hour
+        const expireDate = new Date();
+        expireDate.setHours(expireDate.getHours() + 1);
+
+        const createResetToken = await PasswordResetModel.create(
+          user?.id,
+          token,
+          expireDate
+        );
+
+        if (!createResetToken) {
+          res.status(400).json({
+            success: false,
+            message: "Failed to create reset password link",
+          });
+          return;
+        }
+      } else {
+        token = checkToken.token;
+      }
+
+      console.log("token : ", token);
+
+      await sendResetPasswordEmail(user.email, token);
+
+      res.status(201).json({
+        success: true,
+        message: "Sent reset password email successful",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  resetPassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const { token, password } = req.body;
+      const hashedPassword = await bcryptjs.hash(password, 10);
+      const updatePassword = await PasswordResetModel.update(
+        token,
+        hashedPassword
+      );
+      console.log("controller : ", updatePassword);
+
+      if (!updatePassword) {
+        res
+          .status(400)
+          .json({ success: false, message: "Reset password failed" });
+        return;
+      }
+
+      res
+        .status(200)
+        .json({ success: true, message: "Reset password successful" });
+    } catch (error) {
+      console.log(error);
     }
   };
 

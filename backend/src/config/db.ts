@@ -49,10 +49,10 @@ class Database {
     }
   }
 }
-async function checkTableExists() {
+async function checkAndCreateUserTable() {
   const createTableQuery = `
     CREATE TABLE IF NOT EXISTS users (
-  id CHAR(36) PRIMARY KEY, 
+  id CHAR(36) NOT NULL UNIQUE PRIMARY KEY, 
   email VARCHAR(255) NOT NULL UNIQUE,
   firstName VARCHAR(100) NOT NULL,
   lastName VARCHAR(100) NOT NULL,
@@ -62,9 +62,9 @@ async function checkTableExists() {
   refreshToken VARCHAR(255) DEFAULT NULL,
   createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+);`;
 
-  `;
+
 
   try {
     await Database.query(createTableQuery);
@@ -76,4 +76,51 @@ async function checkTableExists() {
   }
 }
 
-export { Database, dbConfig, checkTableExists };
+async function checkAndCreateEmailVerifyTable() {
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS email_verification_tokens (
+    id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id CHAR(36) NOT NULL,
+    token CHAR(36) NOT NULL UNIQUE,
+    createdAt  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );`;
+  try {
+    await Database.query(createTableQuery);
+    console.log("Table `email_verification_tokens` is ready");
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error("Error creating table:", err.message);
+    }
+  }
+}
+
+async function checkAndCreatePasswordResetTable() {
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id CHAR(36) NOT NULL,
+  token VARCHAR(255) NOT NULL UNIQUE,
+  expires_at DATETIME NOT NULL,
+  used BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+`;
+  try {
+    await Database.query(createTableQuery);
+    console.log("Table `password_reset_tokens` is ready");
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error("Error creating table:", err.message);
+    }
+  }
+}
+
+export {
+  Database,
+  dbConfig,
+  checkAndCreateUserTable,
+  checkAndCreateEmailVerifyTable,
+  checkAndCreatePasswordResetTable,
+};

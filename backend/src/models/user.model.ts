@@ -10,7 +10,7 @@ export class UserModel {
       firstName,
       lastName,
       role,
-      isActive = 1,
+      isActive = 0,
       password,
     } = userData;
 
@@ -55,7 +55,7 @@ export class UserModel {
   }
 
   static async getUserById(userId: string) {
-    const query = "SELECT * FROM users WHERE id = ?";
+    const query = "SELECT id,email,firstName,lastName,role FROM users WHERE id = ?";
     const result = await Database.query(query, [userId]);
 
     if (result.length === 0) {
@@ -66,11 +66,14 @@ export class UserModel {
   }
 
   static async getUserByEmail(email: string): Promise<User | null> {
-    const query = "SELECT * FROM users WHERE email = ? AND isActive = 1";
+
+    const query =
+      "SELECT id,email,firstName,lastName,role FROM users WHERE email = ? AND isActive = 1";
     const result = await Database.query(query, [email]);
     if (result.length === 0) {
       return null;
     }
+    
     return result[0];
   }
 
