@@ -1,6 +1,7 @@
 import express, { Application,Request,Response} from "express";
 import helmet from "helmet";
 import cors from "cors";
+import morgan from "morgan";
 import { rateLimit } from "express-rate-limit";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
@@ -13,7 +14,6 @@ import taskRoutes from "./routes/task.routes";
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
-app.use(cors());
 const allowedOrigins = [
   "http://localhost:3000", 
 ];
@@ -33,6 +33,7 @@ app.use(
   })
 );
 app.use(cookieParser());
+app.use(morgan("combined"));
 
 
 const limiter = rateLimit({
