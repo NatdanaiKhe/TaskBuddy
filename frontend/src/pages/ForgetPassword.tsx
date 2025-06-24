@@ -7,6 +7,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import { Input } from "@/components/ui/input";
 import { useRef, useState } from "react";
@@ -20,6 +29,7 @@ function ForgetPassword() {
   } = useForm<{ email: string }>();
   const formRef = useRef<HTMLFormElement>(null);
   const [loading, setLoading] = useState(false);
+  const [openPopup,setOpenPopup] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // event handler
@@ -30,6 +40,7 @@ function ForgetPassword() {
       if (!res.success) {
         setError(res.message);
       }
+      setOpenPopup(true);
     } catch (error) {
       console.log(error);
     } finally {
@@ -37,8 +48,26 @@ function ForgetPassword() {
     }
   };
 
+  const handlePopupClose = () => {
+    setOpenPopup(false);
+  };
+
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50">
+    <div className="flex flex-col justify-center items-center min-h-[calc(100vh-64px)] h-auto bg-gray-50">
+      <AlertDialog open={openPopup} onOpenChange={handlePopupClose}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Account Created Successfully!</AlertDialogTitle>
+            <AlertDialogDescription>
+              We've sent you a reset password email. Please check your inbox and
+              click the reset your password.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction className="bg-blue-600">Close</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Forgot Your Password ?</CardTitle>

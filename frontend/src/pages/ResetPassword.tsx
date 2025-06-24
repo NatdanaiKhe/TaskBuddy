@@ -51,7 +51,6 @@ function ResetPassword() {
 
   const onSubmit = async (data: PasswordResetFormData) => {
     if (!token) {
-      alert("Invalid reset token. Please request a new password reset.");
       return;
     }
 
@@ -73,6 +72,7 @@ function ResetPassword() {
   if (!token) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
+
         <Card className="w-full max-w-lg">
           <CardHeader>
             <CardTitle className="text-4xl text-red-600">
@@ -97,7 +97,7 @@ function ResetPassword() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-[calc(100vh-64px)] h-auto bg-gray-100">
       <AlertDialog open={open} onOpenChange={handleClose}>
         <AlertDialogContent>
           <AlertDialogHeader>

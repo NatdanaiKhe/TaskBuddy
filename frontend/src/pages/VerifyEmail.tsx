@@ -5,12 +5,12 @@ import { BadgeCheck } from "lucide-react";
 import Loader from "@/components/Loader";
 import Error from "@/components/Error";
 function VerifyEmail() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const token = searchParams.get("token");
   const [seconds, setSeconds] = useState(5);
   const [isActive, setIsActive] = useState(false);
-  const intervalRef = useRef<number | null>(null);;
+  const intervalRef = useRef<number | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -22,7 +22,7 @@ function VerifyEmail() {
           const result = await authService.verifyEmail(token);
           if (result) {
             setSuccess(true);
-            startCountdown()
+            startCountdown();
           }
         }
       } catch (error) {
@@ -59,7 +59,7 @@ function VerifyEmail() {
 
   if (success) {
     return (
-      <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50 gap-4">
+      <div className="flex flex-col justify-center items-center min-h-[calc(100vh-64px)] h-auto bg-gray-50 gap-4">
         <BadgeCheck color="green" size={64} />
         <h1 className="text-4xl font-bold">Verified Success</h1>
         <p>Your email was successfully verified.</p>

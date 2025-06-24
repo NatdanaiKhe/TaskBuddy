@@ -6,14 +6,13 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface LoginFormData {
   email: string;
@@ -22,7 +21,7 @@ interface LoginFormData {
 }
 
 function Login() {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -50,11 +49,10 @@ function Login() {
     setSubmitError(null);
 
     try {
-      await login(data.email, data.password, data.remember);
-      navigate("/");
+      await login(data.email, data.password, data.remember)
+      navigate('/')
     } catch (err: any) {
-      console.error("Login failed", err);
-
+      console.error("Login failed", err)
       // error handler
       if (err.response?.status === 401) {
         setSubmitError("Invalid email or password. Please try again.");
@@ -83,7 +81,7 @@ function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-[calc(100vh-64px)] h-auto bg-gray-100">
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle className="text-4xl">Welcome Back</CardTitle>
