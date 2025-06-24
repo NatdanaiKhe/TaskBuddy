@@ -30,7 +30,11 @@ api.interceptors.response.use(
     const originalRequest = err.config;
 
     // got 
-    if (err.response?.status === 401 && !originalRequest._retry) {
+    if (
+      err.response?.status === 401 &&
+      !originalRequest._retry &&
+      originalRequest.headers?.Authorization
+    ) {
       originalRequest._retry = true;
 
       if (!isRefreshing) {
