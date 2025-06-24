@@ -29,7 +29,7 @@ export class EmailVerifyModel {
 
     // update user status
     const queryUpdate =
-      "UPDATE users SET isActive = true, ,updatedAt = ? WHERE id = ?";
+      "UPDATE users SET isActive = true, updatedAt = ? WHERE id = ?";
     const valueUpdate = [new Date(),result[0].user_id];
     const updateResult = await Database.query(queryUpdate, valueUpdate);
 

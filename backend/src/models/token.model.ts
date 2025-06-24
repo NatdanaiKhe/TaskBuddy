@@ -28,7 +28,7 @@ export class TokenModel {
   }
 
   static async deleteRefreshToken(token: string): Promise<boolean> {
-    const query = "'DELETE FROM users WHERE refreshToken = ?";
+    const query = "DELETE FROM users WHERE refreshToken = ?";
 
     const result = await Database.query(query, [token]);
     if (result.length == 0) {

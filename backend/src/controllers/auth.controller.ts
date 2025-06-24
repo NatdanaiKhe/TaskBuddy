@@ -126,7 +126,6 @@ export class AuthController {
         });
         return;
       }
-
       const isMatch = await bcryptjs.compare(password, user.password);
       if (!isMatch) {
         res.status(401).json({
@@ -156,6 +155,8 @@ export class AuthController {
         user: {
           id: user.id,
           email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
           role: user.role,
         },
       });
