@@ -13,7 +13,7 @@ import { useAuth } from "@/context/useAuth";
 function NavBar() {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, loading,logout } = useAuth();
 
   const MenuList = (
     <>
@@ -22,12 +22,6 @@ function NavBar() {
         className="text-gray-600 hover:text-blue-600 text-center"
       >
         Browse Tasks
-      </a>
-      <a
-        href="/register"
-        className="text-gray-600 hover:text-blue-600 text-center"
-      >
-        Become a Tasker
       </a>
     </>
   );
@@ -39,7 +33,9 @@ function NavBar() {
           <div className="flex items-center space-x-4">
             {/* Logo */}
             <div className="flex items-center">
-              <div className="text-2xl font-bold text-blue-600">TaskBuddy</div>
+              <div className="text-2xl font-bold text-blue-600">
+                <a href="/">TaskBuddy</a>
+              </div>
             </div>
 
             {/* Desktop  */}
@@ -87,7 +83,13 @@ function NavBar() {
                   <DropdownMenuItem>Profile</DropdownMenuItem>
                   <DropdownMenuItem>My Task</DropdownMenuItem>
                   <DropdownMenuItem className="text-red-500">
-                    Logout
+                    <a
+                      onClick={() => {
+                        logout();
+                      }}
+                    >
+                      Logout
+                    </a>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
