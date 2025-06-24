@@ -23,8 +23,8 @@ function Hero() {
             Connect with skilled taskers to help with cleaning, delivery,
             furniture assembly, and more.
           </p>
-          <div className="flex flex-col md:flex-row items-center w-full max-w-md">
-            <div className="w-full max-w-xl relative">
+          <div className="flex flex-col md:flex-row items-center w-full max-w-md gap-2">
+            <div className=" w-full max-w-xl relative">
               <Input
                 type="text"
                 placeholder="What do you need help with?"
@@ -39,7 +39,7 @@ function Hero() {
             </div>
             <Button
               size={"lg"}
-              className="bg-blue-600 hover:bg-blue-400 cursor-pointer"
+              className="bg-blue-600 hover:bg-blue-400 cursor-pointer w-full md:w-[100px]"
             >
               Search
             </Button>

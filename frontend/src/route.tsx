@@ -9,6 +9,8 @@ import { PublicRoute } from "./context/PublicRoute";
 import VerifyEmail from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
 import ForgetPassword from "./pages/ForgetPassword";
+import Tasks from "./pages/Tasks";
+import TaskDetail from "./pages/TaskDetail";
 
 const router = createBrowserRouter([
   {
@@ -19,6 +21,14 @@ const router = createBrowserRouter([
       {
         path: "",
         element: <Home />,
+      },
+      {
+        path: "/task/:id",
+        element: <TaskDetail />,
+      },
+      {
+        path: "/tasks",
+        element: <Tasks />,
       },
       {
         path: "login",
