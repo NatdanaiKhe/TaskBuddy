@@ -116,6 +116,34 @@ async function checkAndCreatePasswordResetTable() {
     }
   }
 }
+async function checkAndCreateTasksTable() {
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS tasks (
+  id VARCHAR(36) PRIMARY KEY,
+  provider_id VARCHAR(36) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  category VARCHAR(100),
+  price DECIMAL(10, 2),
+  location VARCHAR(255),
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  
+  FOREIGN KEY (provider_id) REFERENCES users(id)
+);
+
+`;
+  try {
+    await Database.query(createTableQuery);
+    console.log("Table `tasks` is ready");
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error("Error creating table:", err.message);
+    }
+  }
+}
+
 
 export {
   Database,
@@ -123,4 +151,5 @@ export {
   checkAndCreateUserTable,
   checkAndCreateEmailVerifyTable,
   checkAndCreatePasswordResetTable,
+  checkAndCreateTasksTable,
 };

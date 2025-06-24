@@ -1,7 +1,13 @@
 
 import app from "./src/app";
 import config from "./src/config";
-import { checkAndCreateEmailVerifyTable, checkAndCreatePasswordResetTable, checkAndCreateUserTable, Database } from "./src/config/db";
+import {
+  checkAndCreateEmailVerifyTable,
+  checkAndCreatePasswordResetTable,
+  checkAndCreateUserTable,
+  checkAndCreateTasksTable,
+  Database,
+} from "./src/config/db";
 import logger from "./src/utils/logger";
 
 const PORT = config.PORT || 8000;
@@ -13,6 +19,7 @@ Database.ping().then(res => {
     checkAndCreateUserTable();
     checkAndCreateEmailVerifyTable();
     checkAndCreatePasswordResetTable();
+    checkAndCreateTasksTable();
   } else {
     logger.error("Database connection failed:", res.error);
     process.exit(1);

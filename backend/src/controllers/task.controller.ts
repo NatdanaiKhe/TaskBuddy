@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
+import { v4 as uuidv4 } from "uuid";
 import { TaskModel } from "../models/task.model";
+import { CreateTaskDto } from "../types/taskType";
 
 export class TaskController {
   createTask = async (
@@ -8,7 +10,12 @@ export class TaskController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const taskData = req.body;
+      const providerId = req.user?.id;
+      const taskData: CreateTaskDto = req.body;
+
+      taskData.providerId = providerId!!;
+      const taskId = uuidv4();
+      taskData.id = taskId;
       const task = await TaskModel.createTask(taskData);
       if (!task) {
         res
@@ -48,7 +55,8 @@ export class TaskController {
     next: NextFunction
   ): Promise<void> => {
     try {
-      const tasks = await TaskModel.getAllTask();
+      const { page, limit } = req.body;
+      const tasks = await TaskModel.getAllTask(limit, page);
       if (!tasks) {
         res.status(400).json({ success: false, message: "No tasks found" });
       }
@@ -66,8 +74,16 @@ export class TaskController {
     next: NextFunction
   ): Promise<void> => {
     try {
+      const role = req.user?.role;
+      const user_id = req.user?.id;
       const providerId = req.params.id;
-      const task = await TaskModel.getTaskByProviderId(providerId);
+      let task = null;
+      if (role === "provider" && user_id) {
+        task = await TaskModel.getTaskByProviderId(user_id);
+      } else {
+        task = await TaskModel.getTaskByProviderId(providerId);
+      }
+
       if (!task) {
         res.status(400).json({ success: false, message: "Task not found" });
       }
@@ -104,7 +120,7 @@ export class TaskController {
       }
       res
         .status(200)
-        .json({ success: true, message: "Task updated successfully", task });
+        .json({ success: true, message: "Task updated successfully"});
     } catch (error) {
       next(error);
     }
