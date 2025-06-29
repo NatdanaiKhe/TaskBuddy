@@ -36,13 +36,14 @@ function Tasks() {
     setSearchTerm(event.target.value);
   };
 
-  const handleCategoryChange = (select: string) => {
-    setSelectedCategory(select);
+  const handleCategoryChange = (category: string) => {
+    console.log(selectedCategory);
+    setSelectedCategory(category);
   };
 
-  const handleLocationChange = (select: string) => {
-    console.log(cities);
-    setSelectedLocation(select);
+  const handleLocationChange = (location: string) => {
+    console.log(selectedLocation);
+    setSelectedLocation(location);
   };
   if (loading && !cities) {
     return <Loader />;
