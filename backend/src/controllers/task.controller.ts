@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { TaskModel } from "../models/task.model";
-import { CreateTaskDto } from "../types/taskType";
+import { CreateTaskDto, UpdateTaskDto } from "../types/taskType";
 
 export class TaskController {
   createTask = async (
@@ -12,11 +12,23 @@ export class TaskController {
     try {
       const providerId = req.user?.id;
       const taskData: CreateTaskDto = req.body;
+      console.log("create task: ",taskData);
+      
+      const image = req.file as Express.Multer.File;
+
+      if (image) {
+        taskData.image_url = `/image/${image.filename}`;
+      }
 
       taskData.providerId = providerId!!;
       const taskId = uuidv4();
       taskData.id = taskId;
+      
+      console.log("task data",taskData);
+      
       const task = await TaskModel.createTask(taskData);
+
+      
       if (!task) {
         res
           .status(400)
@@ -103,7 +115,15 @@ export class TaskController {
     try {
       const taskId = req.params.id;
       const userId = req.user?.id;
-      const taskData = req.body;
+      const taskData: UpdateTaskDto = req.body;
+      const image = req.file
+
+      console.log("update task:", taskData);
+
+      if(image){
+        taskData.image_url = `/image/${image.filename}`;
+      }
+      
 
       if (!userId) {
         res.status(400).json({ success: false, message: "User not found" });
@@ -120,7 +140,7 @@ export class TaskController {
       }
       res
         .status(200)
-        .json({ success: true, message: "Task updated successfully"});
+        .json({ success: true, message: "Task updated successfully" });
     } catch (error) {
       next(error);
     }

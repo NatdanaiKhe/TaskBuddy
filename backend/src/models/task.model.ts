@@ -8,12 +8,12 @@ import {
 
 export class TaskModel {
   static async createTask(task: CreateTaskDto): Promise<TaskResponse | null> {
-    const { id, providerId, title, description, price, location, category } =
+    const { id, providerId, title, description, price, location, category,image_url } =
       task;
 
     const query = `
-      INSERT INTO tasks (id, provider_id, title, description, price, category, location)
-      VALUES (?, ?, ?, ?, ?,?,?)
+      INSERT INTO tasks (id, provider_id, title, description, price, category, location,image_url)
+      VALUES (?, ?, ?, ?, ?,?,?,?)
     `;
 
     const values = [
@@ -24,6 +24,7 @@ export class TaskModel {
       price,
       category,
       location,
+      image_url
     ];
 
     const result = await Database.query(query, values);
@@ -81,12 +82,12 @@ export class TaskModel {
     if (result.length === 0) {
       return null;
     }
-    return result[0];
+    return result;
   }
 
   static async updateTask(
     taskId: string,
-    taskData: Task,
+    taskData: UpdateTaskDto,
     userId: string
   ): Promise<UpdateTaskDto | null> {
     const fields: string[] = [];
@@ -102,18 +103,29 @@ export class TaskModel {
       values.push(taskData.description);
     }
 
-    if (taskData.isActive !== undefined) {
-      fields.push("price = ?");
-      values.push(taskData.isActive ? 1 : 0);
+    if (taskData.category !== undefined) {
+      fields.push("category = ?");
+      values.push(taskData.category);
     }
 
-    if (taskData.isActive !== undefined) {
-      fields.push("isActive = ?");
-      values.push(taskData.isActive ? 1 : 0);
-    }
-    if (taskData.isActive !== undefined) {
+    if (taskData.location !== undefined) {
       fields.push("location = ?");
-      values.push(taskData.isActive ? 1 : 0);
+      values.push(taskData.location ? 1 : 0);
+    }
+
+    if(taskData.image_url !== undefined || taskData.image_url !== ""){
+      fields.push("image_url = ?");
+      values.push(taskData.image_url ? 1 : 0);
+    }
+
+    if (taskData.price !== undefined) {
+      fields.push("price = ?");
+      values.push(taskData.price);
+    }
+
+    if (taskData.is_active !== undefined) {
+      fields.push("is_active = ?");
+      values.push(taskData.is_active ? 1 : 0);
     }
 
 
