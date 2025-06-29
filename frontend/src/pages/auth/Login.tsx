@@ -12,7 +12,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { AxiosError } from "axios";
 
 interface LoginFormData {
   email: string;
@@ -21,7 +22,7 @@ interface LoginFormData {
 }
 
 function Login() {
-  const { login, user } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -49,21 +50,22 @@ function Login() {
     setSubmitError(null);
 
     try {
-      await login(data.email, data.password, data.remember)
-      navigate('/')
-    } catch (err: any) {
-      console.error("Login failed", err)
+      await login(data.email, data.password, data.remember);
+      navigate("/");
+    } catch (err: unknown) {
       // error handler
-      if (err.response?.status === 401) {
-        setSubmitError("Invalid email or password. Please try again.");
-      } else if (err.response?.data?.message) {
-        setSubmitError(err.response.data.message);
-      } else if (err.message) {
-        setSubmitError(err.message);
-      } else {
-        setSubmitError(
-          "Login failed. Please check your connection and try again."
-        );
+      if (err instanceof AxiosError) {
+        if (err.response?.status === 401) {
+          setSubmitError("Invalid email or password. Please try again.");
+        } else if (err.response?.data?.message) {
+          setSubmitError(err.response.data.message);
+        } else if (err.message) {
+          setSubmitError(err.message);
+        } else {
+          setSubmitError(
+            "Login failed. Please check your connection and try again."
+          );
+        }
       }
     } finally {
       setIsLoading(false);

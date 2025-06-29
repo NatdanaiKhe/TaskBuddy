@@ -34,6 +34,7 @@ import { Label } from "@/components/ui/label";
 
 import type { RegisterFormData } from "@/types/authType";
 import { useState } from "react";
+import { AxiosError } from "axios";
 
 interface RoleOption {
   value: string;
@@ -53,7 +54,7 @@ function Register() {
     watch,
     formState: { errors },
   } = useForm<RegisterFormData>({
-    mode: "onBlur", // Validate on blur for better UX
+    mode: "onBlur", 
   });
 
   const password = watch("password");
@@ -76,24 +77,20 @@ function Register() {
         data.password
       );
       console.log(res);
-      
-      if(res.success !== true){
-        setSubmitError(res.message)
-      }else{
+
+      if (res.success !== true) {
+        setSubmitError(res.message);
+      } else {
         setSuccessDialogOpen(true);
       }
-
-      
-    } catch (err: any) {
-      console.error("Registration failed", err);
-
+    } catch (error: unknown) {
       // Handle different types of errors
-      if (err.response?.data?.message) {
-        setSubmitError(err.response.data.message);
-      } else if (err.message) {
-        setSubmitError(err.message);
-      } else {
-        setSubmitError("Registration failed. Please try again.");
+      if (error instanceof AxiosError) {
+        if (!error.response?.data?.success && error.status == 200) {
+          setSubmitError(error.response?.data.message);
+        } else {
+          setSubmitError("Registration failed. Please try again.");
+        }
       }
     } finally {
       setIsLoading(false);
@@ -114,7 +111,7 @@ function Register() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-64px)] h-auto  bg-gray-100">
+    <div className="flex items-start justify-center md:items-center min-h-[calc(100vh-64px)] h-auto  bg-gray-100">
       {/* Success Dialog */}
       <AlertDialog
         open={successDialogOpen}

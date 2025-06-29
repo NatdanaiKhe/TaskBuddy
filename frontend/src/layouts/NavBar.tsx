@@ -3,8 +3,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SearchIcon, MenuIcon, UserIcon, XIcon } from "lucide-react";
@@ -13,7 +11,7 @@ import { useAuth } from "@/context/useAuth";
 function NavBar() {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, loading,logout } = useAuth();
+  const { user,logout } = useAuth();
 
   const MenuList = (
     <>
