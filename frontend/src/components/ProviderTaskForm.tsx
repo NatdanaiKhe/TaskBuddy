@@ -25,11 +25,12 @@ function ProviderTaskForm({ form, onSubmit, initialData }: TaskFormProps) {
   } = form;
 
   const image_url =
-    import.meta.env.VITE_IMAGE_ENDPOINT + initialData?.image_url; ;
+    import.meta.env.VITE_IMAGE_ENDPOINT + initialData?.image_url;
+    console.log("image url:",initialData?.image_url);
+    
 
   const [cities, setCities] = useState<CityType[]>([]);
-  const [imagePreview, setImagePreview] = useState(image_url|| "");
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState("");
 
   // Load city data
   useEffect(() => {
@@ -50,7 +51,7 @@ function ProviderTaskForm({ form, onSubmit, initialData }: TaskFormProps) {
       setValue("category", initialData.category);
       setValue("location", initialData.location);
       setValue("description", initialData.description);
-      
+      setImagePreview(image_url)
     }
 
     register("image", {
@@ -62,7 +63,6 @@ function ProviderTaskForm({ form, onSubmit, initialData }: TaskFormProps) {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setSelectedImage(file);
       setValue("image", file, { shouldValidate: true });
       const reader = new FileReader();
       reader.onload = e => {
@@ -73,9 +73,8 @@ function ProviderTaskForm({ form, onSubmit, initialData }: TaskFormProps) {
   };
 
   const removeImage = () => {
-    setSelectedImage(null);
     setImagePreview("");
-    setValue("image", null); // <-- clear from react-hook-form
+    setValue("image", undefined);
   };
 
   return (
@@ -104,7 +103,7 @@ function ProviderTaskForm({ form, onSubmit, initialData }: TaskFormProps) {
 
       {/* Price */}
       <div>
-        <Label htmlFor="price">Price ($)</Label>
+        <Label htmlFor="price">Price (฿)</Label>
         <Input
           id="price"
           type="number"

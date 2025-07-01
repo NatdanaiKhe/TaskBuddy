@@ -9,6 +9,16 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -34,13 +44,16 @@ function ProviderDashboard() {
   const [editingService, setEditingService] = useState<TaskCardProps | null>();
   const [taskList, setTaskList] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [deleteItem, setDeleteItem] = useState<string>();
 
   const fetchTask = async () => {
     try {
       setLoading(true);
-      if(!user?.id) return;
+      if (!user?.id) return;
       const tasks = await taskService.getTaskByProviderId(user.id);
-      console.log("tasks:", tasks.task);
+      console.log(taskList);
+
       setTaskList(tasks.task);
     } catch (error) {
       if (error instanceof Error) {
@@ -53,19 +66,40 @@ function ProviderDashboard() {
     }
   };
 
+  const fetchDeleteTask = async () => {
+    try {
+      setLoading(true);
+      if (!deleteItem) return;
+
+      const result = await taskService.deleteTask(deleteItem);
+      if (result.success === true) {
+        toast.success("Task deleted successfully");
+        fetchTask();
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error("Task deleted failed");
+      } else {
+        console.error("Unexpected error:", error);
+      }
+    } finally {
+      setLoading(false);
+      setAlertOpen(false);
+    }
+  };
+
   useEffect(() => {
     fetchTask();
-  },[]);
+  }, []);
 
   // initial form and related function
-  const form = useForm<TaskCardProps>({
+  const form = useForm<TaskFormValues>({
     mode: "onBlur",
   });
 
   const { formState } = form;
 
   const onSubmit = async (data: TaskFormValues) => {
-    console.log("submit data:", data);
     try {
       if (editingService) {
         await taskService.updateTask(editingService.id, data);
@@ -90,6 +124,11 @@ function ProviderDashboard() {
   const handleEditTask = (task: TaskCardProps) => {
     setEditingService(task);
     handleOpenDialog();
+  };
+
+  const handleDeleteTask = (task: TaskCardProps) => {
+    setDeleteItem(task.id);
+    setAlertOpen(true);
   };
 
   const handleOpenDialog = () => {
@@ -123,7 +162,34 @@ function ProviderDashboard() {
               Add New Service
             </Button>
           </div>
-          <Toaster/>
+          <Toaster />
+          {/* alert dialog */}
+          <AlertDialog open={alertOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  your tasks and remove it data from our servers.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel
+                  onClick={() => {
+                    setAlertOpen(false);
+                  }}
+                >
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={fetchDeleteTask}
+                  className="bg-red-500 hover:bg-red-700"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <Dialog
             defaultOpen={false}
             open={isAddingService}
@@ -156,51 +222,59 @@ function ProviderDashboard() {
             </DialogContent>
           </Dialog>
 
-          <Table>
-            {/* <TableCaption>A list of your recent invoices.</TableCaption> */}
-            <TableHeader>
-              <TableRow>
-                <TableHead>Service</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {taskList.map(task => (
-                <TableRow key={task.id}>
-                  <TableCell className="font-bold">{task.title}</TableCell>
-                  <TableCell>{task.category}</TableCell>
-                  <TableCell>{task.price}</TableCell>
-                  <TableCell>{task.location}</TableCell>
-                  <TableCell>
-                    <Badge
-                      className={
-                        task.is_active == true
-                          ? "bg-green-300 text-green-900"
-                          : "bg-red-300 text-red-900"
-                      }
-                    >
-                      {task.is_active == true ? "active" : "closed"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      onClick={() => handleEditTask(task)}
-                      className="text-blue-600 hover:text-blue-900 mr-4 bg-transparent hover:bg-gray-50"
-                    >
-                      <PencilIcon className="w-5 h-5" />
-                    </Button>
-                    <Button className="text-red-600 hover:text-red-900 bg-transparent hover:bg-gray-50">
-                      <TrashIcon className="w-5 h-5" />
-                    </Button>
-                  </TableCell>
+          {taskList.length !== 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[200px]">Service</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Action</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {taskList.map(task => (
+                  <TableRow key={task.id}>
+                    <TableCell className="font-bold">{task.title}</TableCell>
+                    <TableCell>{task.category}</TableCell>
+                    <TableCell>{task.price}</TableCell>
+                    <TableCell>{task.location}</TableCell>
+                    <TableCell>
+                      <Badge
+                        className={
+                          task.is_active == true
+                            ? "bg-green-300 text-green-900"
+                            : "bg-red-300 text-red-900"
+                        }
+                      >
+                        {task.is_active == true ? "active" : "closed"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() => handleEditTask(task)}
+                        className="text-blue-600 hover:text-blue-900 mr-4 bg-transparent hover:bg-gray-50"
+                      >
+                        <PencilIcon className="w-5 h-5" />
+                      </Button>
+                      <Button
+                        onClick={() => handleDeleteTask(task)}
+                        className="text-red-600 hover:text-red-900 bg-transparent hover:bg-gray-50"
+                      >
+                        <TrashIcon className="w-5 h-5" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="flex justify-center items-center w-full">
+              <h1>You didn't have any task yet</h1>
+            </div>
+          )}
         </div>
       </div>
     </main>
