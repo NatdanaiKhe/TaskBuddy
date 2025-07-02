@@ -13,8 +13,8 @@ router.post(
   taskController.createTask
 );
 
-router.get("/:id", taskController.getTaskById);
 router.get("/", taskController.getAllTask);
+router.get("/:id", taskController.getTaskById);
 router.get("/provider/:id", taskController.getTaskByProviderId);
 
 router.put(

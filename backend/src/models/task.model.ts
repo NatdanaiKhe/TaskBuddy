@@ -8,8 +8,16 @@ import {
 
 export class TaskModel {
   static async createTask(task: CreateTaskDto): Promise<TaskResponse | null> {
-    const { id, providerId, title, description, price, location, category,image_url } =
-      task;
+    const {
+      id,
+      providerId,
+      title,
+      description,
+      price,
+      location,
+      category,
+      image_url,
+    } = task;
 
     const query = `
       INSERT INTO tasks (id, provider_id, title, description, price, category, location,image_url)
@@ -24,7 +32,7 @@ export class TaskModel {
       price,
       category,
       location,
-      image_url
+      image_url,
     ];
 
     const result = await Database.query(query, values);
@@ -45,7 +53,8 @@ export class TaskModel {
   }
 
   static async getTaskById(taskId: string): Promise<TaskResponse | null> {
-    const query = "SELECT * FROM tasks WHERE id = ?";
+    const query =
+      "SELECT tasks.id,provider_id,title,description,category,price,location,image_url,users.firstName,users.lastName,users.createdAt FROM tasks LEFT JOIN users ON tasks.provider_id = users.id WHERE tasks.id = ?";
     const result = await Database.query(query, [taskId]);
 
     if (result.length === 0) {
@@ -56,20 +65,67 @@ export class TaskModel {
   }
 
   static async getAllTask(
-    limit: number = 10,
-    page: number = 1
-  ): Promise<TaskResponse[]> {
-    const query =
-      "SELECT * FROM tasks ORDER BY created_at DESC LIMIT ? OFFSET ?";
+    limit: number = 12,
+    page: number = 1,
+    q?: string,
+    category?: string,
+    location?: string
+  ): Promise<{
+    tasks: TaskResponse[];
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+  }> {
     const offset = (page - 1) * limit;
-    const values = [limit, offset];
-    const result = await Database.query(query, values);
 
-    if (result.lenght == 0) {
-      return [];
+    // Build dynamic WHERE conditions
+    const whereClauses: string[] = [];
+    const values: any[] = [];
+
+    if (q) {
+      whereClauses.push("title LIKE ?");
+      values.push(`%${q}%`);
     }
 
-    return result as TaskResponse[];
+    if (category) {
+      whereClauses.push("category = ?");
+      values.push(category);
+    }
+
+    if (location) {
+      whereClauses.push("location = ?");
+      values.push(location);
+    }
+
+    const whereSQL = whereClauses.length
+      ? `WHERE ${whereClauses.join(" AND ")}`
+      : "";
+
+    // Main query
+    const dataQuery = `
+      SELECT * FROM tasks
+      ${whereSQL}
+      ORDER BY created_at DESC
+      LIMIT ? OFFSET ?
+    `;
+    const dataValues = [...values, limit, offset];
+    const result = await Database.query(dataQuery, dataValues);
+
+    // Count query
+    const countQuery = `
+      SELECT COUNT(*) as count FROM tasks
+      ${whereSQL}
+    `;
+    const countResult = await Database.query(countQuery, values);
+    const totalItems = countResult[0].count;
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return {
+      tasks: result as TaskResponse[],
+      totalItems,
+      totalPages,
+      currentPage: page,
+    };
   }
 
   static async getTaskByProviderId(
@@ -110,12 +166,12 @@ export class TaskModel {
 
     if (taskData.location !== undefined) {
       fields.push("location = ?");
-      values.push(taskData.location ? 1 : 0);
+      values.push(taskData.location);
     }
 
-    if(taskData.image_url !== undefined || taskData.image_url !== ""){
+    if (taskData.image_url != undefined) {
       fields.push("image_url = ?");
-      values.push(taskData.image_url ? 1 : 0);
+      values.push(taskData.image_url);
     }
 
     if (taskData.price !== undefined) {
@@ -127,7 +183,6 @@ export class TaskModel {
       fields.push("is_active = ?");
       values.push(taskData.is_active ? 1 : 0);
     }
-
 
     if (fields.length === 0) {
       return null;
@@ -145,8 +200,7 @@ export class TaskModel {
       return null;
     }
 
-    return result
-    
+    return result;
   }
 
   static async deleteTask(taskId: string, userId: string): Promise<boolean> {
