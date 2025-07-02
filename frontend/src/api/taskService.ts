@@ -24,8 +24,28 @@ const taskService = {
     return res.data;
   },
   
-  getAllTask: async (page: number) => {
-    const res = await axios.get(`/tasks?page=${page}`);
+  getAllTask: async ({
+    page = 1,
+    limit = 12,
+    q,
+    category,
+    location,
+  }: {
+    page?: number;
+    limit?: number;
+    q?: string | null;
+    category?: string | null;
+    location?: string | null;
+  }) => {
+    const params = new URLSearchParams();
+  
+    if (page) params.append("page", page.toString());
+    if (limit) params.append("limit", limit.toString());
+    if (q) params.append("q", q);
+    if (category) params.append("category", category);
+    if (location) params.append("location", location);
+  
+    const res = await axios.get(`/tasks?${params.toString()}`);
     return res.data;
   },
   updateTask: async (id: string, data: TaskFormValues) => {
