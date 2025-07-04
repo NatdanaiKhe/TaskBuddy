@@ -1,30 +1,71 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SearchIcon, MenuIcon, UserIcon, XIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/useAuth";
+import { Input } from "@/components/ui/input";
+import type { Task } from "@/types/taskTypes";
+import taskService from "@/api/taskService";
+import SearchResult from "@/components/SearchResult";
 function NavBar() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, loading,logout } = useAuth();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Task[]>([]);
+  
 
   const MenuList = (
     <>
       <a
         href="/tasks"
-        className="text-gray-600 hover:text-blue-600 text-center"
+        className="text-center text-gray-600 hover:text-blue-600"
       >
         Browse Tasks
       </a>
     </>
   );
+
+  const ProviderMenuList = (
+    <>
+      <a href="/" className="text-center text-gray-600 hover:text-blue-600">
+        My Task
+      </a>
+      <a
+        href="/booking"
+        className="text-center text-gray-600 hover:text-blue-600"
+      >
+        My Booking
+      </a>
+    </>
+  );
+
+  useEffect(() => {
+    const handleSearch = async () => {
+      if (searchQuery.trim() === "") return;
+      try {
+        const results = await taskService.getAllTask({q:searchQuery});
+        setSearchResults(results.data.tasks || []);
+      } catch (error) {
+        console.error("Error searching movies:", error);
+      }
+    };
+
+    const debounceTimeout = setTimeout(handleSearch, 300);
+
+    return () => clearTimeout(debounceTimeout);
+  }, [searchQuery]);
+
+  // Even handlers
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value;
+    setSearchQuery(query);
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
@@ -39,36 +80,42 @@ function NavBar() {
             </div>
 
             {/* Desktop  */}
-            <nav className="hidden md:flex items-center space-x-8">
-              {MenuList}
+            <nav className="hidden items-center space-x-8 md:flex">
+              {!user || user.role == "customer" ? MenuList : ProviderMenuList}
             </nav>
           </div>
 
           {/* Search and User */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden items-center space-x-4 md:flex">
             <div className="relative">
-              <input
+              <Input
                 type="text"
                 placeholder="Search tasks..."
-                className="pl-10 md:w-[150px] lg:w-[300px] pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="rounded-full border border-gray-300 py-2 pr-4 pl-10 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none md:w-[150px] lg:w-[300px]"
               />
-              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <SearchIcon className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
+              <SearchResult
+                results={searchResults}
+                setResults={setSearchResults}
+              />
             </div>
             {!user && (
-              <div className="flex justify-between items-center gap-4">
+              <div className="flex items-center justify-between gap-4">
                 <button
                   onClick={() => {
                     navigate("/login");
                   }}
-                  className="p-2 rounded-full hover:bg-gray-100"
+                  className="rounded-full p-2 hover:bg-gray-100"
                 >
-                  <UserIcon className="w-6 h-6 text-gray-600" />
+                  <UserIcon className="h-6 w-6 text-gray-600" />
                 </button>
                 <button
                   onClick={() => {
                     navigate("/register");
                   }}
-                  className="bg-blue-600 text-white px-5 py-2 rounded-full hover:bg-blue-700 transition"
+                  className="rounded-full bg-blue-600 px-5 py-2 text-white transition hover:bg-blue-700"
                 >
                   Sign Up
                 </button>
@@ -98,36 +145,36 @@ function NavBar() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2"
+            className="p-2 md:hidden"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? (
-              <XIcon className="w-6 h-6 text-gray-600" />
+              <XIcon className="h-6 w-6 text-gray-600" />
             ) : (
-              <MenuIcon className="w-6 h-6 text-gray-600" />
+              <MenuIcon className="h-6 w-6 text-gray-600" />
             )}
           </button>
         </div>
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden mt-4 pb-4">
+          <div className="mt-4 pb-4 md:hidden">
             <div className="flex flex-col space-y-3">
               {MenuList}
               <div className="relative mt-2">
                 <input
                   type="text"
                   placeholder="Search tasks..."
-                  className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-full border border-gray-300 py-2 pr-4 pl-10 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
-                <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <SearchIcon className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
               </div>
               {!user && (
                 <button
                   onClick={() => {
                     navigate("/login");
                   }}
-                  className="bg-blue-600 text-white py-2 rounded-full hover:bg-blue-700 transition"
+                  className="rounded-full bg-blue-600 py-2 text-white transition hover:bg-blue-700"
                 >
                   Sign Up
                 </button>

@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET!;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET!;
 const PASSWORD_RESET_TOKEN_SECRET = process.env.PASSWORD_RESET_TOKEN_SECRET!;
-const JWT_EXPIRATION = process.env.ACCESS_TOKEN_SECRET || "30d";
+const JWT_EXPIRATION = process.env.ACCESS_TOKEN_EXPIRE || "30d";
 
 interface TokenPayload extends jwt.JwtPayload {
   id: string;

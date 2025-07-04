@@ -20,29 +20,33 @@ import {
 import { Input } from "@/components/ui/input";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import { AxiosError } from "axios";
 
 function ForgetPassword() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
   } = useForm<{ email: string }>();
   const formRef = useRef<HTMLFormElement>(null);
   const [loading, setLoading] = useState(false);
   const [openPopup,setOpenPopup] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // event handler
   const handleForgotPassword = async (data: { email: string }) => {
     try {
       setLoading(true);
-      const res = await authService.forgotPassword(data.email);
-      if (!res.success) {
-        setError(res.message);
-      }
+      await authService.forgotPassword(data.email);
       setOpenPopup(true);
-    } catch (error) {
-      console.log(error);
+    } catch (error:unknown) {
+      if(error instanceof AxiosError){
+        if (error.response?.status === 400) {
+          setSubmitError("Email not found");
+        } else {
+          setSubmitError("Server error. Please try again later");
+        }
+      }
+      
     } finally {
       setLoading(false);
     }
@@ -82,6 +86,11 @@ function ForgetPassword() {
             className="space-y-6"
             noValidate
           >
+            {submitError && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                <p className="text-sm text-red-600">{submitError}</p>
+              </div>
+            )}
             <div className="grid gap-2">
               <Input
                 id="email"

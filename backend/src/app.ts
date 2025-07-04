@@ -13,7 +13,7 @@ import taskRoutes from "./routes/task.routes";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(helmet());
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 const allowedOrigins = [
   "http://localhost:3000", 
 ];
@@ -38,7 +38,7 @@ app.use(morgan("combined"));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, 
-  max: 100,
+  max: 200,
   standardHeaders: true, 
   legacyHeaders: false, 
   message: {
@@ -46,13 +46,35 @@ const limiter = rateLimit({
     error: "Too many requests, please try again later.",
   },
 });
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: 429,
+    error: "Too many requests, please try again later.",
+  },
+});
+
 app.use(limiter);
 
 // Routes
-app.use('/api/users', userRoutes);
+app.use('/api/users', authLimiter,userRoutes);
 app.use('/api/auth', authRoutes); 
 app.use('/api/tasks', taskRoutes);
 
+
+// static image route
+app.use(
+  "/image",
+  express.static("./src/uploads", {
+    setHeaders: (res, path, stat) => {
+      res.set("Access-Control-Allow-Origin", "http://localhost:3000");
+    },
+  })
+);
 // Health check
 app.get("/health", (req:Request, res:Response) => {
   res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });

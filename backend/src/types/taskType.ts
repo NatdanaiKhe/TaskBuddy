@@ -11,10 +11,10 @@ export interface Task {
   category: string;
   price: number;
   location: string;
-  imageUrls?: string[];
-  isActive : boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  image_url?: string;
+  is_active : boolean;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface CreateTaskDto {
@@ -25,7 +25,7 @@ export interface CreateTaskDto {
   category: string;
   price: number;
   location: string;
-  imageUrls?: string[];
+  image_url: string;
 }
 
 export interface UpdateTaskDto {
@@ -34,9 +34,9 @@ export interface UpdateTaskDto {
   category?: string;
   price?: number;
   location?: string;
-  imageUrls?: string[];
-  updatedAt: Date;
-  isActive: boolean;
+  image_url?: string;
+  updated_at: Date;
+  is_active: boolean;
 }
 
 export interface TaskResponse {
@@ -56,8 +56,8 @@ export interface Booking {
   status: BookingStatus;
   date: Date;
   message?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface Review {
@@ -65,13 +65,13 @@ export interface Review {
   bookingId: string;
   rating: number;
   comment: string;
-  createdAt: Date;
+  created_at: Date;
 }
 
 export interface Category {
   id: string;
   name: string;
   description?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
 }
