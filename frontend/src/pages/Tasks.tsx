@@ -95,15 +95,21 @@ function Tasks() {
   };
 
   const handleCategoryChange = (category: string) => {
-    const newCategoryParam = new URLSearchParams(searchParams.toString());
-    newCategoryParam.set("category", category);
-    setSearchParams(newCategoryParam);
+    const newCategoryParams = new URLSearchParams(searchParams.toString());
+
+    newCategoryParams.set("category", category);
+    newCategoryParams.set("page", "1");
+
+    setSearchParams(newCategoryParams);
     setSelectedCategory(category);
+    
   };
 
   const handleLocationChange = (location: string) => {
     const newLocationParams = new URLSearchParams(searchParams.toString());
     newLocationParams.set("location", location);
+    newLocationParams.set("page", "1");
+
     setSearchParams(newLocationParams);
     setSelectedLocation(location);
   };
