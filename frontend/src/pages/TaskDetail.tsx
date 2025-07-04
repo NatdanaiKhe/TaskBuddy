@@ -5,6 +5,7 @@ import type { TaskDetailType } from "@/types/taskTypes";
 import taskService from "@/api/taskService";
 import Loader from "@/components/Loader";
 import dayjs from "dayjs";
+import { Button } from "@/components/ui/button";
 
 function TaskDetail() {
   const navigate = useNavigate();
@@ -37,12 +38,12 @@ function TaskDetail() {
   return (
     <div className="relative flex h-auto min-h-[calc(100vh-64px)] flex-col items-center justify-center gap-4 bg-gray-50">
       <div className="mt-6 w-full max-w-7xl px-4">
-        <button
+        <Button
           onClick={() => navigate(-1)}
           className="cursor-pointer rounded-full border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow transition-colors hover:bg-gray-100"
         >
           ← Back
-        </button>
+        </Button>
       </div>
       <div className="container mx-auto px-4">
         <div className="overflow-hidden rounded-lg bg-white shadow-sm">
@@ -106,9 +107,12 @@ function TaskDetail() {
                 <p className="text-gray-600">{task.description}</p>
               </div>
               {/* Book Now Button */}
-              <button className="w-full rounded-full bg-blue-600 px-6 py-3 text-white transition-colors hover:bg-blue-700">
+              <Button
+                onClick={() => navigate(`/task/${id}/booking`)}
+                className="w-full rounded-full bg-blue-600 px-6 py-3 text-white transition-colors hover:bg-blue-700"
+              >
                 Book Now
-              </button>
+              </Button>
             </div>
           </div>
         </div>

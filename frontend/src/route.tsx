@@ -11,6 +11,7 @@ import ResetPassword from "./pages/ResetPassword";
 import ForgetPassword from "./pages/ForgetPassword";
 import Tasks from "./pages/Tasks";
 import TaskDetail from "./pages/TaskDetail";
+import Booking from "./pages/Booking";
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
       {
         path: "",
         element: <Home />,
+      },
+      {
+        path: "/task/:id/booking",
+        element: <Booking />,
       },
       {
         path: "/task/:id",
