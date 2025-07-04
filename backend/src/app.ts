@@ -38,7 +38,7 @@ app.use(morgan("combined"));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, 
-  max: 100,
+  max: 200,
   standardHeaders: true, 
   legacyHeaders: false, 
   message: {
@@ -46,10 +46,22 @@ const limiter = rateLimit({
     error: "Too many requests, please try again later.",
   },
 });
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: 429,
+    error: "Too many requests, please try again later.",
+  },
+});
+
 app.use(limiter);
 
 // Routes
-app.use('/api/users', userRoutes);
+app.use('/api/users', authLimiter,userRoutes);
 app.use('/api/auth', authRoutes); 
 app.use('/api/tasks', taskRoutes);
 
