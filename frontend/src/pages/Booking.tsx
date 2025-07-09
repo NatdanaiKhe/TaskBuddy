@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
+import { isBefore } from "date-fns";
 import {
   Popover,
   PopoverContent,
@@ -18,6 +19,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { useAuth } from "@/context/useAuth";
 import type { TaskDetailType } from "@/types/taskTypes";
 import { CalendarDays, ChevronDownIcon, Clock, MapPinIcon } from "lucide-react";
@@ -26,6 +39,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { hourOptions } from "@/mock";
 import type { BookingForm } from "@/types/bookingTypes";
 import { useForm } from "react-hook-form";
+import bookingService from "@/api/bookingService";
 
 function Booking() {
   const navigate = useNavigate();
@@ -35,23 +49,29 @@ function Booking() {
   const [loading, setLoading] = useState(false);
   const [task, setTask] = useState<TaskDetailType>();
   const [open, setOpen] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
 
   // form
-  const [date, setDate] = useState<Date | undefined>(undefined);
-  const [duration, setDuration] = useState('1');
-  const totalPrice = task
-    ? Number(duration) * task.price
-    : Number(duration) * 0;
-
   const {
     register,
     handleSubmit,
     setValue,
     trigger,
-    formState: { errors,isSubmitting },
+    watch,
+    formState: { errors, isSubmitting },
   } = useForm<BookingForm>({
     mode: "onBlur",
+    defaultValues: {
+      duration: "1",
+      date: undefined,
+      start_time: "",
+      notes: "",
+    },
   });
+
+  const duration = watch("duration");
+  const date = watch("date");
+  const totalPrice = task ? Number(duration) * task.price : 0;
 
   const fetchTask = async (id: string) => {
     try {
@@ -80,26 +100,24 @@ function Booking() {
     }
   }, [id]);
 
-  const handleDurationChange = (value: string) => {
-    setValue("duration", value, { shouldValidate: true });
-    setDuration(value);
-  };
-
-  const handleDateSelect = (date: Date) => {
-    if (date) {
-      setDate(date); 
-      setValue("date", date, { shouldValidate: true });
-      trigger("date");
-      setOpen(false);
-    }
-  };
-
-
-
-  const onSubmit = (data:BookingForm) => {
-    console.log("booking form data :",data);
+  const onSubmit = async (data: BookingForm) => {
+    console.log("data form:",data);
     
-    // call booking api
+    data.total_price = totalPrice;
+    data.task_id = id!;
+
+    try {
+      const res = await bookingService.booking(data);
+      
+      if (res.success) {
+        setAlertOpen(true);
+      }
+
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error("Something went wrong while booking the task.");
+      }
+    }
   };
 
   if (loading) {
@@ -140,6 +158,32 @@ function Booking() {
               </div>
             </div>
           </div>
+          <Toaster />
+          <AlertDialog open={alertOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Booking Success</AlertDialogTitle>
+                <AlertDialogDescription>
+                 Please wait for provider to confirm this booking.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel
+                  onClick={() => {
+                    navigate('/')
+                  }}
+                >
+                  Back
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={()=>navigate('/booking')}
+                  className="bg-blue-500 hover:bg-blue-700"
+                >
+                  View Your Booking
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           {/* Form */}
           <form
             onSubmit={handleSubmit(onSubmit)}
@@ -159,7 +203,9 @@ function Booking() {
                       id="date"
                       className="w-full justify-between font-normal"
                     >
-                      {date ? date.toLocaleDateString() : "Select date"}
+                      {date
+                        ? new Date(date).toLocaleDateString()
+                        : "Select date"}
                       <ChevronDownIcon />
                     </Button>
                   </PopoverTrigger>
@@ -170,9 +216,21 @@ function Booking() {
                     <Calendar
                       mode="single"
                       required
-                      selected={date}
+                      selected={date ? new Date(date) : undefined}
                       captionLayout="dropdown"
-                      onSelect={handleDateSelect}
+                      disabled={(date) => isBefore(date, new Date())}
+                      onSelect={(selectedDate: Date | undefined) => {
+                        if (selectedDate) {
+                          setValue("date", selectedDate, {
+                            shouldValidate: true,
+                          });
+                          trigger("date");
+                          setOpen(false);
+                        }
+                      }}
+                      {...register("date", {
+                        required: "Date is required",
+                      })}
                     />
                   </PopoverContent>
                 </Popover>
@@ -190,15 +248,14 @@ function Booking() {
                   type="time"
                   id="time-picker"
                   step="1"
-                  defaultValue="10:30:00"
-                  {...register("startTime", {
+                  {...register("start_time", {
                     required: "Start time is required",
                   })}
                   className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
                 />
-                {errors.startTime && (
+                {errors.start_time && (
                   <p className="text-sm text-red-600">
-                    {errors.startTime.message}
+                    {errors.start_time.message}
                   </p>
                 )}
               </div>
@@ -210,15 +267,20 @@ function Booking() {
               </Label>
               <Select
                 defaultValue={duration}
-                onValueChange={handleDurationChange}
-                {...register("duration", { required: "Duration is required" })}
+                onValueChange={(value) => {
+                  setValue("duration", value, { shouldValidate: true });
+                  trigger("duration");
+                }}
+                {...register("duration", {
+                  required: "Duration is required",
+                })}
               >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select category" />
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select duration" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>All Categories</SelectLabel>
+                    <SelectLabel>All Durations</SelectLabel>
                     {hourOptions && (
                       <>
                         {hourOptions.map((hour) => {
