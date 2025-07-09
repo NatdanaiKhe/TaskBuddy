@@ -31,9 +31,10 @@ api.interceptors.response.use(
 
     // got 
     if (
-      err.response?.status === 401 &&
-      !originalRequest._retry &&
-      originalRequest.headers?.Authorization
+      err.response?.status === 401 ||
+      (err.response?.status === 403 &&
+        !originalRequest._retry &&
+        originalRequest.headers?.Authorization)
     ) {
       originalRequest._retry = true;
 
@@ -43,7 +44,7 @@ api.interceptors.response.use(
           const data = await authService.refreshToken();
           accessToken = data.accessToken;
           setAccessToken(accessToken);
-          refreshQueue.forEach(cb => cb());
+          refreshQueue.forEach((cb) => cb());
           refreshQueue = [];
         } catch (e) {
           refreshQueue = [];
@@ -54,11 +55,17 @@ api.interceptors.response.use(
       }
 
       return new Promise((resolve, reject) => {
-        refreshQueue.push(() => {
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          resolve(api(originalRequest));
+        refreshQueue.push(async () => {
+          try {
+            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+            const response = await api(originalRequest);
+            resolve(response);
+          } catch (err) {
+            reject(err);
+          }
         });
       });
+      
     }
 
     return Promise.reject(err);

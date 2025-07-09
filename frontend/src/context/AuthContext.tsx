@@ -29,12 +29,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("accessToken", accessToken);
   };
 
-  const logout = () => {
+  const logout = async() => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("hasLoggedInBefore");
     setAccessTokenState(null);
     setUser(null);
-    authService.logout();
+    await authService.logout();
     redirect("/login");
   };
 
@@ -49,8 +49,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (token) {
           setGlobalAccessToken(token);
           const user = await authService.getMe();
-          console.log("get me:" ,user);
-          
           setUser(user);
           setAccessTokenState(token);
         }
