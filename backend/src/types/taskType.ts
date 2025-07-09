@@ -1,8 +1,4 @@
 // types.ts
-
-export type BookingStatus = "pending" | "accepted" | "declined";
-
-
 export interface Task {
   id: string;
   providerId: string;
@@ -41,23 +37,12 @@ export interface UpdateTaskDto {
 
 export interface TaskResponse {
   id: string;
-  providerId: string;
+  provider_id: string;
   title: string;
   description: string;
   price: number;
   location: string;
   category: string;
-}
-
-export interface Booking {
-  id: string;
-  customerId: string;
-  serviceId: string;
-  status: BookingStatus;
-  date: Date;
-  message?: string;
-  created_at: Date;
-  updated_at: Date;
 }
 
 export interface Review {

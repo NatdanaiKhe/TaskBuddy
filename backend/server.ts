@@ -6,6 +6,7 @@ import {
   checkAndCreatePasswordResetTable,
   checkAndCreateUserTable,
   checkAndCreateTasksTable,
+  checkAndCreateBookingTable,
   Database,
 } from "./src/config/db";
 import logger from "./src/utils/logger";
@@ -20,6 +21,7 @@ Database.ping().then(res => {
     checkAndCreateEmailVerifyTable();
     checkAndCreatePasswordResetTable();
     checkAndCreateTasksTable();
+    checkAndCreateBookingTable();
   } else {
     logger.error("Database connection failed:", res.error);
     process.exit(1);

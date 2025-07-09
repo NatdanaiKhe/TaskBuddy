@@ -64,8 +64,6 @@ async function checkAndCreateUserTable() {
   updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );`;
 
-
-
   try {
     await Database.query(createTableQuery);
     console.log("Table `users` is ready");
@@ -144,6 +142,34 @@ async function checkAndCreateTasksTable() {
   }
 }
 
+async function checkAndCreateBookingTable() {
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS bookings (
+    id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    customer_id CHAR(36) NOT NULL,
+    provider_id CHAR(36) NOT NULL,
+    task_id CHAR(36) NOT NULL,
+    date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    duration INT NOT NULL,
+    total_price INT NOT NULL,
+    notes TEXT,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('pending', 'accepted', 'declined','cancelled', 'completed')),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (provider_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
+  );`;
+  try {
+    await Database.query(createTableQuery);
+    console.log("Table `bookings` is ready");
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error("Error creating table:", err.message);
+    }
+  }
+}
 
 export {
   Database,
@@ -152,4 +178,5 @@ export {
   checkAndCreateEmailVerifyTable,
   checkAndCreatePasswordResetTable,
   checkAndCreateTasksTable,
+  checkAndCreateBookingTable,
 };

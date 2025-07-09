@@ -10,6 +10,7 @@ const app: Application = express();
 import userRoutes from "./routes/user.routes";
 import authRoutes from "./routes/auth.routes";
 import taskRoutes from "./routes/task.routes";
+import bookingRoutes from "./routes/booking.route";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -64,6 +65,7 @@ app.use(limiter);
 app.use('/api/users', authLimiter,userRoutes);
 app.use('/api/auth', authRoutes); 
 app.use('/api/tasks', taskRoutes);
+app.use("/api/booking", bookingRoutes);
 
 
 // static image route
