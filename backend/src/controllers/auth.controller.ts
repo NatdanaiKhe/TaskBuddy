@@ -179,7 +179,7 @@ export class AuthController {
     try {
       // verify refresh token and check in database
       const { id, role } = verifyRefreshToken(token);
-      const tokenInDb = await TokenModel.findRefreshToken(token);
+      const tokenInDb = await TokenModel.findRefreshToken(id);
       if (!tokenInDb) {
         res.sendStatus(403);
         return;

@@ -3,7 +3,7 @@ import { Database } from "../config/db";
 
 export class TokenModel {
   static async findRefreshToken(userId: string): Promise<string | null> {
-    const query = "SELECT refreshToken FROM users WHERE ?";
+    const query = "SELECT refreshToken FROM users WHERE id = ?";
 
     const result = await Database.query(query, [userId]);
     if (result.length == 0) {
