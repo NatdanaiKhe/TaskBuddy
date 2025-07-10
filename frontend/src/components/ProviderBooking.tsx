@@ -13,7 +13,6 @@ function ProviderBooking() {
   // const [popupOpen, setPopupOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-
   const fetchBookings = async () => {
     try {
       setLoading(true);
@@ -29,13 +28,9 @@ function ProviderBooking() {
           (booking: BookingType) => booking.status === "accepted",
         );
         const completedBookings = res.booking?.filter(
-          (booking: BookingType) => booking.status === "completed",
+          (booking: BookingType) =>
+            booking.status === "completed" || booking.status == "cancelled",
         );
-
-        console.log("pending: ", pendingBookings);
-        console.log("confirm: ", confirmedBookings);
-        console.log("completed: ", completedBookings);
-
         setPendingBookings(pendingBookings);
         setConfirmedBookings(confirmedBookings);
         setCompletedBookings(completedBookings);
@@ -51,18 +46,16 @@ function ProviderBooking() {
     }
   };
 
-  const updateBookingStatus = async(bookingId: string, status: string) => {
-    console.log(`Updating booking ${bookingId} to status: ${status}`);
-    try{
-      const res = await bookingService.updateBookingStatus(bookingId,status);
+  const updateBookingStatus = async (bookingId: string, status: string) => {
+    try {
+      const res = await bookingService.updateBookingStatus(bookingId, status);
 
-    if(res.success){
-      toast.success("Update task status success")
-      fetchBookings();
-    }
-    
-    }catch(error){
-      if(error instanceof Error){
+      if (res.success) {
+        toast.success("Update task status success");
+        fetchBookings();
+      }
+    } catch (error) {
+      if (error instanceof Error) {
         toast.success("Failed to update task status");
       }
     }
@@ -85,8 +78,6 @@ function ProviderBooking() {
   };
 
   useEffect(() => {
-   
-
     fetchBookings();
   }, []);
   if (loading) {
@@ -101,7 +92,7 @@ function ProviderBooking() {
         <h2 className="mb-6 text-xl font-semibold text-gray-900">
           Pending Bookings
         </h2>
-        {!pendingBookings ? (
+        {pendingBookings?.length == 0 || !pendingBookings ? (
           <p className="text-gray-500">No pending bookings at the moment.</p>
         ) : (
           <div className="space-y-4">
