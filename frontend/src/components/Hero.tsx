@@ -2,7 +2,7 @@ import { useState } from "react";
 import { SearchIcon } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { popularTask } from "@/mock";
+import { popularTask } from "@/mock/index";
 import { useNavigate } from "react-router-dom";
 
 function Hero() {
@@ -55,24 +55,9 @@ function Hero() {
                 key={index}
                 className="cursor-pointer rounded-full bg-white px-4 py-2 shadow-sm transition-colors hover:bg-blue-50"
               >
-                {task}
+                <a href={`/tasks?category=${task.value}`}>{task.label}</a>
               </span>
             ))}
-            {/* <span className="bg-white px-4 py-2 rounded-full shadow-sm">
-              House Cleaning
-            </span>
-            <span className="bg-white px-4 py-2 rounded-full shadow-sm">
-              Furniture Assembly
-            </span>
-            <span className="bg-white px-4 py-2 rounded-full shadow-sm">
-              Home Repairs
-            </span>
-            <span className="bg-white px-4 py-2 rounded-full shadow-sm">
-              Moving Help
-            </span>
-            <span className="bg-white px-4 py-2 rounded-full shadow-sm">
-              Delivery
-            </span> */}
           </div>
         </div>
       </div>

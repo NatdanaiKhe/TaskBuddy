@@ -36,7 +36,7 @@ import type { TaskDetailType } from "@/types/taskTypes";
 import { CalendarDays, ChevronDownIcon, Clock, MapPinIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { hourOptions } from "@/mock";
+import { hourOptions } from "@/mock/index";
 import type { BookingForm } from "@/types/bookingTypes";
 import { useForm } from "react-hook-form";
 import bookingService from "@/api/bookingService";

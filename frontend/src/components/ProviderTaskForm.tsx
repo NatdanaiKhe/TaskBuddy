@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { categories } from "@/mock";
+import { categoryOptions } from "@/mock/index";
 import type { CityType } from "@/types";
 import { Button } from "./ui/button";
 
@@ -133,7 +133,7 @@ function ProviderTaskForm({ form, onSubmit, initialData }: TaskFormProps) {
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>All Categories</SelectLabel>
-                {categories.map(cat => (
+                {categoryOptions.map(cat => (
                   <SelectItem key={cat.value} value={cat.value}>
                     {cat.label}
                   </SelectItem>

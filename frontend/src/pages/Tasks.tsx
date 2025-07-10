@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/pagination";
 import Loader from "@/components/Loader";
 import type { CityType } from "@/types";
-import { categories } from "@/mock";
+import { categoryOptions } from "@/mock";
 import taskService from "@/api/taskService";
 import type { Task } from "@/types/taskTypes";
 import { useSearchParams } from "react-router-dom";
@@ -174,9 +174,9 @@ function Tasks() {
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>All Categories</SelectLabel>
-                  {categories && (
+                  {categoryOptions && (
                     <>
-                      {categories.map((category) => {
+                      {categoryOptions.map((category) => {
                         return (
                           <SelectItem
                             key={category.value}
