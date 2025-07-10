@@ -43,7 +43,7 @@ export class TaskModel {
 
     return {
       id,
-      providerId,
+      provider_id: providerId,
       title,
       description,
       category,

@@ -12,7 +12,6 @@ export class TaskController {
     try {
       const providerId = req.user?.id;
       const taskData: CreateTaskDto = req.body;
-      console.log("create task: ", taskData);
 
       const image = req.file as Express.Multer.File;
 
@@ -23,8 +22,6 @@ export class TaskController {
       taskData.providerId = providerId!!;
       const taskId = uuidv4();
       taskData.id = taskId;
-
-      console.log("task data", taskData);
 
       const task = await TaskModel.createTask(taskData);
 
