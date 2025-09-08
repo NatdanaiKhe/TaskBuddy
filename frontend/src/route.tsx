@@ -12,6 +12,7 @@ import ForgetPassword from "./pages/ForgetPassword";
 import Tasks from "./pages/Tasks";
 import TaskDetail from "./pages/TaskDetail";
 import Booking from "./pages/Booking";
+import UserBooking from "./pages/UserBooking";
 
 const router = createBrowserRouter([
   {
@@ -35,6 +36,14 @@ const router = createBrowserRouter([
         path: "/tasks",
         element: <Tasks />,
       },
+      {
+        path: "/bookings",
+        element: (
+          <ProtectedRoute>
+            <UserBooking />
+          </ProtectedRoute>
+        ),
+      }, 
       {
         path: "login",
         element: (

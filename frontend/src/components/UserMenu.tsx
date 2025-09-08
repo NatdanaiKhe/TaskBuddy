@@ -32,7 +32,13 @@ function UserMenu() {
         {user.firstName + " " + user.lastName}
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem>Profile</DropdownMenuItem>
+        <DropdownMenuItem>
+          {user.role === "customer" ? (
+            <a href="bookings">Bookings</a>
+          ) : (
+            <a href="/">Dashboard</a>
+          )}
+        </DropdownMenuItem>
         <DropdownMenuItem className="text-red-500" onClick={logout}>
           Logout
         </DropdownMenuItem>

@@ -176,7 +176,7 @@ function Booking() {
                   Back
                 </AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={()=>navigate('/booking')}
+                  onClick={()=>navigate('/bookings')}
                   className="bg-blue-500 hover:bg-blue-700"
                 >
                   View Your Booking
@@ -334,7 +334,7 @@ function Booking() {
             </div>
 
             {/* Submit Button */}
-            <div className="border-t border-gray-200 bg-gray-50 px-6 py-4">
+            <div className="px-6 py-4">
               <Button
                 type="submit"
                 disabled={isSubmitting}
