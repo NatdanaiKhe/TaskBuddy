@@ -153,7 +153,7 @@ function Booking() {
                   {task.location}
                 </div>
                 <div className="mt-1 text-sm text-gray-500">
-                  by {task.firstName + " " + task.lastName}
+                  by {task.firstname + " " + task.firstname}
                 </div>
               </div>
             </div>
