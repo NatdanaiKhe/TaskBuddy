@@ -88,7 +88,7 @@ function TaskDetail() {
                   </div>
                   <div>
                     <div className="font-medium text-gray-900">
-                      {task.firstName + " " + task.lastName}
+                      {task.firstname + " " + task.lastname}
                     </div>
                     <div className="text-sm text-gray-500">
                       <div className="mt-1 flex items-center">

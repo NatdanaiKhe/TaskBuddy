@@ -24,8 +24,8 @@ export interface TaskDetailType {
   location: string;
   is_active: boolean;
   image_url: string;
-  firstName: string;
-  lastName: string;
+  firstname: string;
+  lastname: string;
   createdAt: Date;
 }
 
