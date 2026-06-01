@@ -1,4 +1,4 @@
-# TaskBuddy ([Demo Here](https://taskbuddy.natdanai.tech/))
+# TaskBuddy ([Demo Here](https://taskbuddy.natdanai.dev/))
 
 A learning project as marketplace platform connecting users (Customers) with local service providers (e.g., cleaners, tutors, handymen).
 
@@ -36,16 +36,26 @@ A learning project as marketplace platform connecting users (Customers) with loc
 
 **Backend**
 - Node.js (Express)
-- MySQL (database)
+- PostgreSQL (database)
 - JWT for authentication
 - Multer (for image upload handling)
+
+## Local Backend DB Config
+
+Set backend env:
+
+```env
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/taskbuddy
+```
+
+At startup, backend now checks this database and creates it automatically if it does not exist (requires DB user create-database permission).
 
 ---
 
 ## Deployment
 - **Frontend**: Vercel (auto-deploy from GitHub)
 - **Backend**: Homelab server (Dockerized)
-  - Run Node.js + MySQL containers
+  - Run Node.js + PostgreSQL containers
   - Use Cloudflare Tunnel for secure public access
 
 ---

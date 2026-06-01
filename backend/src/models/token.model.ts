@@ -20,21 +20,13 @@ export class TokenModel {
     const query = "UPDATE users SET refreshToken = ? WHERE id = ?";
 
     const result = await Database.query(query, [token, userId]);
-    if (result.length == 0) {
-      return false;
-    }
-
-    return true;
+    return result.affectedRows > 0;
   }
 
   static async deleteRefreshToken(token: string): Promise<boolean> {
-    const query = "SET refreshToken = null WHERE refreshToken = ?";
+    const query = "UPDATE users SET refreshToken = null WHERE refreshToken = ?";
 
     const result = await Database.query(query, [token]);
-    if (result.length == 0) {
-      return false;
-    }
-
-    return true;
+    return result.affectedRows > 0;
   }
 }

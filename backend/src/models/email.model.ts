@@ -9,11 +9,11 @@ export class EmailVerifyModel {
     const values = [user_id, token];
 
     const result = await Database.query(query, values);
-    if (!result[0]) {
+    if (result.affectedRows === 0) {
       return null;
     }
 
-    return result[0];
+    return { user_id, token };
   }
 
   static async update(token: string): Promise<any> {
@@ -23,7 +23,7 @@ export class EmailVerifyModel {
     const values = [token];
     const result = await Database.query(query, values);
     
-    if (!result) {
+    if (!result || result.length === 0) {
       return null;
     }
 
@@ -33,7 +33,7 @@ export class EmailVerifyModel {
     const valueUpdate = [new Date(),result[0].user_id];
     const updateResult = await Database.query(queryUpdate, valueUpdate);
 
-    if (updateResult.affectedRow == 0) {
+    if (updateResult.affectedRows === 0) {
       return null;
     }
     return updateResult;

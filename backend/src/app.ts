@@ -15,16 +15,22 @@ import bookingRoutes from "./routes/booking.route";
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
-const allowedOrigins = [
-  "http://localhost:3000", 
-];
+const normalizeOrigin = (origin: string) => origin.trim().replace(/\/+$/, "");
+const allowedOrigins = (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || "http://localhost:3000")
+  .split(",")
+  .map(normalizeOrigin)
+  .filter(Boolean);
+
+const isAllowedOrigin = (origin?: string) => {
+  if (!origin) return true;
+  return allowedOrigins.includes(normalizeOrigin(origin));
+};
 
 // Configure CORS
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
+      if (isAllowedOrigin(origin)) {
         return callback(null, true);
       } else {
         return callback(new Error("Not allowed by CORS"));
@@ -72,8 +78,12 @@ app.use("/api/booking", bookingRoutes);
 app.use(
   "/image",
   express.static("./src/uploads", {
-    setHeaders: (res, path, stat) => {
-      res.set("Access-Control-Allow-Origin", "http://localhost:3000");
+    setHeaders: (res, _path, _stat) => {
+      const requestOrigin = res.req.headers.origin as string | undefined;
+      if (requestOrigin && isAllowedOrigin(requestOrigin)) {
+        res.set("Access-Control-Allow-Origin", requestOrigin);
+        res.set("Vary", "Origin");
+      }
     },
   })
 );

@@ -43,14 +43,14 @@ export class PasswordResetModel {
     const values = [user_id, token, expired_at];
 
     const result = await Database.query(query, values);
-    if (!result[0]) {
+    if (result.affectedRows === 0) {
       return null;
     }
 
     return {
-      user_id: result[0].user_id,
-      token: result[0].token,
-      expires_at: result[0].expires_at,
+      user_id,
+      token,
+      expires_at: expired_at,
     };
   }
 
